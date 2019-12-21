@@ -69,7 +69,7 @@
 							 0  0  0  0  0  0  1  0  1
 							 0  0  0  0  0  0  0  1  0]
 			@test kets(t) == "+|0010> \n+|1110> \n"
-			@test t.commands == ["initialise(t)"
+			@test t.commands == ["initialise(4)"
 								 "hadamard(2)"  
 								 "phase(1)"     
 								 "cnot(2,1)"    
@@ -83,7 +83,7 @@
 								 "phase(3)" ]
 			t.trackCommands=false
 			hadamard(t,4)
-			@test t.commands == ["initialise(t)"
+			@test t.commands == ["initialise(4)"
 								 "hadamard(2)"  
 								 "phase(1)"     
 								 "cnot(2,1)"    
@@ -105,7 +105,7 @@
 							 0  0  0  0  0  1  0  0  0
 							 0  0  0  0  0  0  1  0  0
 							 0  0  0  0  0  0  0  1  0]
-           @test t.commands == ["initialise(t)"
+           @test t.commands == ["initialise(4)"
 								 "hadamard(2)"  
 								 "phase(1)"     
 								 "cnot(2,1)"    
@@ -118,7 +118,7 @@
 								 "phase(3)"     
 								 "phase(3)" ]
 			reinitialise(t)
-			@test t.commands == ["initialise(t)"]
+			@test t.commands == ["initialise(4)"]
 
 							    
 

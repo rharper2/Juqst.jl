@@ -38,10 +38,10 @@
  Scott Aaronson and Daniel Gottesman,
  arXiv:quant-ph/0406196v5
 
- The initial tableau represents a |00...0> ket in the stabiliser state
+ The initial tableau represents a |00...0\$\\rangle\$ ket in the stabiliser state
  This stabilises with "Z" and anti-stabilises with "X"
- So the tableau starts off with an Identity in the Anti commute top X section
- and identity in the commuting - Z section.
+ So the tableau starts off with an Identity in the 'anti commute' top half in the X section 
+ and identity in the commuting (bottom) half in the Z section.
 
  For the purposes of this port, the tableau is exactly replicated as per the paper
  i.e. the "state" (Tableau.state) is an Int32 array (used as a bit array)
@@ -147,7 +147,7 @@ See also: [`initialise`](@ref)
 function reinitialise(t::Tableau)
 	initialise(t)
 	t.trackCommands = true
-	t.commands = ["initialise($t)"]
+	t.commands = ["initialise($(t.qubits))"]
 	t.executeCommands = [Expr(:call,:initialise,:_t)]
 	return t
 end
@@ -310,9 +310,9 @@ function hadamard(t::Tableau,qubit::Integer,showOutput::Bool=false)
 end
 
 """
-	hadamard(t::Tableau,qubits::Integer...;showOutput = false)
+	hadamard(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 
-Peforms hadamards on each of the qubits supplied.
+Peforms hadamards on **each** of the qubits supplied.
 
 # Examples
 ```julia-repl
@@ -321,7 +321,7 @@ julia> hadamard(t,2,3,1)
 
 See also: [`cnot`](@ref) [`phase`](@ref), [`measure`](@ref), [`X`](@ref), [`Z`](@ref)
 """
-function hadamard(t::Tableau,qubits::Integer...;showOutput = false)
+function hadamard(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 	for i in qubits
 		hadamard(t,i,false)
 	end
@@ -376,7 +376,7 @@ end
 
 
 """
-	phase(t::Tableau,qubits::Integer...;showOutput = false)
+	phase(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 
 Peforms phase on each of the qubits supplied.
 
@@ -387,7 +387,7 @@ julia> phase(t,2,3,1)
 
 See also: [`cnot`](@ref) [`hadamard`](@ref), [`measure`](@ref), [`X`](@ref), [`Z`](@ref)
 """
-function phase(t::Tableau,qubits::Integer...;showOutput = false)
+function phase(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 	for i in qubits
 		phase(t,i,false)
 	end
@@ -414,7 +414,7 @@ function Z(t::Tableau,qubit::Integer,showOutput::Bool=false)
 end
 
 """
-	Z(t::Tableau,qubits::Integer...;showOutput = false)
+	Z(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 
 Convenience function to perform a 'Z' gate on the tableau on each of the qubits supplied. Performs the gate by doing two phase gates.
 
@@ -425,7 +425,7 @@ julia> Z(t,2,3,1)
 
 See also: [`cnot`](@ref) [`hadamard`](@ref), [`measure`](@ref), [`X`](@ref), [`Z`](@ref)
 """
-function Z(t::Tableau,qubits::Integer...;showOutput = false)
+function Z(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 	for i in qubits
 		Z(t,i)
 	end
@@ -452,7 +452,7 @@ function X(t::Tableau,qubit::Integer,showOutput::Bool=false)
 end
 
 """
-	X(t::Tableau,qubits::Integer...;showOutput = false)
+	X(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 
 Convenience function to perform an 'X' gate on the tableau on each of the qubits supplied.
 Performs the gate by doing a hadamard, two phase gates and a hadamard on each of the qubits.
@@ -464,7 +464,7 @@ julia> X(t,2,3,1)
 
 See also: [`cnot`](@ref) [`hadamard`](@ref), [`measure`](@ref), [`phase`](@ref), [`Z`](@ref)
 """
-function X(t::Tableau,qubits::Integer...;showOutput = false)
+function X(t::Tableau,qubits::Integer...;showOutput::Bool = false)
 	for i in qubits
 		X(t,i,false)
 	end
@@ -477,8 +477,8 @@ end
 """
     measure(t::Tableau,qubit::Integer)
 
-Performs a measurement on the supplied qubit. If the Tableau is not in Z eigenstate
-will randomly choose the result and collapse the Tableau approriately.
+Performs a measurement on the supplied qubit. If the Tableau is not in a Z eigenstate, it
+will (pseudo) randomly choose the result and collapse the Tableau approriately.
 
 """
 function measure(t::Tableau,qubit::Integer)

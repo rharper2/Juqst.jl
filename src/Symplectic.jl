@@ -1108,9 +1108,14 @@ function generateRawCliffords(;phaseGate=[1 0;0 im],hadamardGate=1/sqrt(2)*[1 1;
     return straightClifford
 end
 
-function drawCircuit()
-	global commands
-    qasmCommands=[]
+
+""" 
+	drawCircuit(commands)
+	Takes the command string and returns their qasm equivalent.
+	Can then be passed into e.g. qiskit or something similar to draw them.
+"""
+function drawCircuit(commands)
+	qasmCommands=[]
     labels=[]
 	currentDir = pwd()
 	for i = 1:size(commands,1)
@@ -1140,8 +1145,13 @@ function drawCircuit()
     return (qasmCommands,labels)
 end
 
+"""
+	makeFromCommand(command)
 
-
+	Takes the commands in a Tableau and uses them to build a matrix representing the Tableau (in the computational basis)
+	Uses the original initialise command to determine the size of the system.
+	Note: for many qubits this gets quite big (scales as \$2^n\$)
+"""
 function makeFromCommand(command)
 	up=[1;0]
 	down=[0;1]
@@ -1235,7 +1245,13 @@ function makeFromCommand(command)
     return  currentState
 end
 
+"""
+	makeFromCommand(t::Tableau)
 
+	Uses the commands stored in a Tableau and uses them to build a matrix representing the Tableau (in the computational basis)
+	Uses the original initialise command to determine the size of the system.
+	Note: for many qubits this gets quite big (scales as \$2^n\$)
+"""
 function makeFromCommand(t::Tableau)
 	return makeFromCommand(t.commands)
 end

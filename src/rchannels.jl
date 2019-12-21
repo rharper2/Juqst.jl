@@ -141,28 +141,37 @@ end
 
 
 """
-    Some helper funcation to generate typical, high fidelity channels and lower fidelity
-    state preperation and measurement noise channels.
+    Helper function to generate typical, high fidelity channel.
 """
 function randomFidelityNoise()
     return genChannel(0.06,0.998,0.04,0.06)
 end
 
+"""
+    Helper function to generate typical, lower fidelity channel.
+    I use it to simulate a state preparation channel.
+"""
 function randomPrepNoise()
     return genChannel(0.05,0.985,0.15,0.05)
 end
 
+"""
+    Helper function to generate typical, lower fidelity channel.
+    I typically use it to simulate measurement error.
+"""
 function randomMeasureNoise()
     return genChannel(0.05,0.98,0.15,0.05)
 end
 
 
 """
-    Simple helper function - designed to help generate a map of a specific fidelity
+    function genChannelMap(f)
+    Simple helper function - designed to help generate a map of a specific fidelity (supplied parameter).
+    Just generates random channels until you get one of the correct fidelity \$\\pm 0.0001\$.
     In general though you would want to rewrite this to give genChannel
     parameters that will result in random channels that often bracket the desired fidelity
     May take a long time if the parameters are far from the types of channels generated
-    by randomFidelityNoise (currently circa 0.98)
+    by randomFidelityNoise.
 """
 function genChannelMap(f)
     while true
@@ -181,13 +190,17 @@ pZ=[1 0;0 -1]
 # This can be a bit slow, because of the makeSuper on large qubits.
 # I have done this better somewhere.
 """
-    pass in an original noise map (super operator basis)
-    the control bit, the target bit
-    will return a noise map with a small amount of random noise added between these qubits
+    function add2QPauliNoise(originalMap,cbit,tbit;pauliToAdd = pZ)
+
+    Adds some noise between two qubits in the noise map.
+    You pass in an  noise map (super operator basis)
+    the control bit and the target bit and optionally the axis of rotation for the noise.
+    will return a noise map with a small amount of random noise added between these qubits.
+    The noise itself is calculated as \$e^(i*\\frac{\\text{rand()}}{20}\\text{pauliToAdd})\$
 """
 function add2QPauliNoise(originalMap,cbit,tbit;pauliToAdd = pZ)
     nqubitsInMap = round(Int,log2(sqrt(size(originalMap,1))))
-    print("Map is $nqubitsInMap qubits\n")
+    #print("Map is $nqubitsInMap qubits\n")
     ok = false
     ## So we are getting irritating (what I think are) rounding errors here, best way to avoid.
     zz = []

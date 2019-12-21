@@ -154,14 +154,29 @@ function swap_involution( r::Matrix )
   reshape( rl, size(r) )
 end
 
+"""
+  choi2liou
+
+  Takes a superoperator in choi matrix form and returns the liouville superoperator (computational basis)
+"""
 function choi2liou( r::Matrix  )
   choi_liou_involution( r )
 end
 
+"""
+  liou2choi
+
+  Take a liouville superoperator (computational basis) and return the choi matrix
+"""
 function liou2choi( r::Matrix )
   choi_liou_involution( r )
 end
 
+
+"""
+  takes a liouville superoperator (computational basis) and returns the Chi matrix
+  (basically the choi matrix in Pauli basis)
+"""
 function liou2choiX(r::Matrix)
   d = round(Int, sqrt(size(r,1)) )
   rl = reshape( r, (d, d, d, d) )
@@ -169,6 +184,9 @@ function liou2choiX(r::Matrix)
   reshape( rl, size(r) )'
 end
 
+"""
+  takes the Chi matrix (Choi matrix in Pauli basis) and return the liouville superoperator, computaitonal basis
+"""
 function choiX2liou(r::Matrix)
   d = round(Int, sqrt(size(r,1)) )
   rl = reshape( r, (d, d, d, d) )
@@ -176,8 +194,11 @@ function choiX2liou(r::Matrix)
   reshape( rl, size(r) )
 end
 
-# This stays the same, save that we need to take into account dimensional factors.
-# Note slight negative eigenvalue (roundeing can cause problems). Here I round to 15 digits.
+"""
+  takes the choi matrix and returns the kraus operators.
+   This stays the same, save that we need to take into account dimensional factors.
+   Note slight negative eigenvalue (rounding can cause problems). Here I round to 15 digits.
+"""
 function choi2kraus(r::Matrix{T}) where T
   d = sqrt(size(r,1))
   (vals,vecs) = eigen( d*r )
@@ -191,8 +212,10 @@ function choi2kraus(r::Matrix{T}) where T
   kraus_ops
 end
 
-
-
+"""
+  Takes a vector of kraus operators (matrices) and 
+  converts them to a liouville superoperator (computational basis)
+"""
 function kraus2liou( k::Vector{Matrix{T}}) where T
   l = zeros(T,map(x->x^2,size(k[1])))
   for i in 1:length(k)
@@ -202,10 +225,18 @@ function kraus2liou( k::Vector{Matrix{T}}) where T
   l
 end
 
+"""
+  Takes a liouville superoperator (computational basis) and
+  returns a vector of the equivalen Krawu vectors
+"""
 function liou2kraus( l::Matrix )
   choi2kraus( liou2choi( l ) )
 end
 
+
+""" 
+  Takes a vector of kraus operators and returns the choi matrix
+"""
 function kraus2choi(k::Vector{Matrix{T}} ) where T
   liou2choi(kraus2liou(k))
   # Seems to fail for some kraus vectors.
@@ -225,6 +256,11 @@ _num2quat(n,l) = map(s->parse(Int,s),collect(string(n,base=4,pad=l)))
 
 _toPauli(p) = reduce(kron,[_Paulis[x+1] for x in p])
 
+
+"""
+  Converts a liouville superoperator in the Pauli basis
+  to one in the computational basis. Order of Paulis is I,X,Y and Z.
+"""
 function pauliliou2liou( m::Matrix )
   if size(m,1) != size(m,2)
     error("Only square matrices supported")
@@ -242,8 +278,10 @@ function pauliliou2liou( m::Matrix )
   res
 end
 
-
-
+"""
+  Converts a liouville superoperator in the computaional basis
+  to one in the pauli basis. Order of Paulis is I,X,Y and Z.
+"""
 function liou2pauliliou( m::Matrix{T} ) where T
   if size(m,1) != size(m,2)
     error("Only square matrices supported")
@@ -266,12 +304,13 @@ function liou2pauliliou( m::Matrix{T} ) where T
 end
 
 
-# Note the basis here has changed from marcusps version,
-# The rightmost paulis are varying the quickest.
-# Also note the transpose ( .' ) - this makes it ROW stacking
-# So for instance
-# (0 -im//im 0) vectorises as (0 -im im 0) (unlike column used elsewhere where its (0 im -im 0))
-
+""" Takes a choi matrix and returns the Chi Matrix 
+  Note the basis here has changed from marcusps version,
+ The rightmost paulis are varying the quickest.
+  Also note the transpose ( .' ) - this makes it ROW stacking
+  So for instance
+  (0 -im//im 0) vectorises as (0 -im im 0) (unlike column used elsewhere where its (0 im -im 0))
+"""
 function choi2chi( m::Matrix{T} ) where T
   if size(m,1) != size(m,2)
     error("Only square matrices supported")
@@ -318,6 +357,7 @@ end
   Returns whether is completely positivel.
   Assumes input is in liouville basis (not pauli-liouville - use pauliliou2liou)
   Converts to choi and checks the eigenvalues.
+  -- tweaked to increase eps slightly was getting a trivial false !cp right on the boundary.
 """
 function iscp(m; tol=0.0)
     evs = eigvals(liou2choi(m))
@@ -325,6 +365,12 @@ function iscp(m; tol=0.0)
     all(real(evs) .> -tol) && all(abs.(imag(evs)) .< tol)
 end
 
+"""
+  istp(m;tol)
+
+  Returns whether is trace perserving..
+  Assumes input is in liouville basis (not pauli-liouville - use pauliliou2liou)
+"""
 function istp(m; tol=0.0)
     tol = tol==0.0 ? eps(abs.(one(eltype(m)))) : tol
     dsq = size(m,1)
@@ -332,12 +378,24 @@ function istp(m; tol=0.0)
     norm(m'*vec(eye(d))-vec(eye(d)),Inf) < tol
 end
 
+"""
+  ischannel(m;tol)
+
+  Returns whether is the liouville superoperator is trace perserving and completely positive.
+  Assumes input is in liouville basis (not pauli-liouville - use pauliliou2liou)
+"""
 function ischannel(m; tol=0.0)
     #println(iscp(m,tol=tol))
     #println(istp(m,tol=tol))
     iscp(m,tol=tol) && istp(m,tol=tol)
 end
 
+"""
+  unital(m;tol)
+
+  Returns whether is the liouville superoperator is unital.
+  Assumes input is in liouville basis (not pauli-liouville - use pauliliou2liou)
+"""
 function isunital(m; tol=0.0)
     tol = tol==0.0 ? eps(abs(one(eltype(m)))) : tol
     dsq = size(m,1)
