@@ -11,7 +11,9 @@ pkg> add https://github.com/rharper2/Juqst.jl
 
 The exampleNotebooks directory contains, suprisingly enough, some sample notebooks that show how to work this. They assume IJulia. The one that shows how to use the Stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early.
 
-This readme mainly details the CHP part of the programs included, there is documentation on the other functionality.
+This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html
+
+Below is a introduction to the CHP part of the package.
 
 ```julia
     Tableau(n::Integer)
