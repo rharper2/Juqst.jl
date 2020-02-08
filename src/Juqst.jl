@@ -77,6 +77,12 @@ export 	fidelity,
 		randomMeasureNoise,
 		genChannelMap
 
-		
+include("marginal.jl")
+
+
+export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField,marginalise
+export getGrainedP,mutualInformation,relativeEntropy,conditionalMutualInfo,covarianceMatrix,JSD
+export correlationMatrix,marginaliseFromRawData
+
 
 end # module
