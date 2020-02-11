@@ -80,7 +80,8 @@ export 	fidelity,
 include("marginal.jl")
 
 
-export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField,marginalise
+export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField,marginalise,projectSimplex,getIndices,reconstructedJS
+export reconstruct,covarianceMatrix
 export getGrainedP,mutualInformation,relativeEntropy,conditionalMutualInfo,covarianceMatrix,JSD
 export correlationMatrix,marginaliseFromRawData
 

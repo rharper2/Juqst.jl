@@ -1,5 +1,3 @@
-module Marginal
-
 # Note all the graphical stuff and IBM specific stuff has been moved into a different file
 # marginalDrawing.jl which should be included if you want to use it.
 
@@ -532,9 +530,22 @@ function covarianceMatrix(p;reverseDigits = false)
     return covmat
 end
 
+"""
+    marginaliseFromRawData
 
+    rawData - all of the observations ie. an array of 1..|lengths] each being a \$2^n\$ vector.
+    constraints - currently a list of constraints in the same from as [`gibbsRandomField(pps,constraints)`][@ref]
+    lengths - the lengths the data sets were taken at
 
+    Takes in the raw observations, for each of the lengths specified in length.
+    Extracts the joint probabilities needed from constraints.
+    Marginalises the observations, transforms, fits, transforms and fills in the joint probabilities.
+    Returns the completed gibbs factors.
 
+    Note if your \$2^n\$  vectors are too big, simply re-write to pass in the actual observations and work out the marginalised observations as you scan through them,
+    potentially sparse arrays will help (although not sure if marginalise will work)
+
+"""
 function marginaliseFromRawData(rawData,constraints,lengths)
     overlaps = []
     for (idx,i) in enumerate(constraints[1:end-1])
@@ -573,7 +584,17 @@ function marginaliseFromRawData(rawData,constraints,lengths)
 end
 
 
-# Take a probability distribution on n qubits and compute the covariance matrix as above.
+"""
+    correlationMatrix(p)
+
+## Correlation
+   
+    Computes the covariance matrix \$\\Sigma\$ and then let:
+    \$D = \\sqrt{diag{\\Sigma}\$
+
+    Return \$D^{-1}\\Sigma D^{-1}\$
+    See also See also: [`covarianceMatrix`](@ref)   
+"""
 function correlationMatrix(p)
     M = covarianceMatrix(p,reverseDigits=false)
     d = sqrt(inv(LinearAlgebra.Diagonal(M)));
@@ -581,8 +602,4 @@ function correlationMatrix(p)
 end
 
 
-
-
-
-end
 
