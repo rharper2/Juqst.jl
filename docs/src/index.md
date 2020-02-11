@@ -3,7 +3,7 @@
 
 
 ```@contents
-Pages = ["chp.md", "open-systems.md","channels.md"]
+Pages = ["chp.md", "open-systems.md","channels.md","ProbabilityAlgs.md"]
 Depth = 3
 ```
 

@@ -52,20 +52,25 @@ Set Tableau.showRaw to true to see the underlying state as a matrix.
 
 ## Stabiliser Circuits
 
-    state = setup(number_ofQubits)
+```Julia
+state = setup(number_ofQubits)
+```
 
 prepares the stabiliser state for the correct number of qubits in the |000..000> basis state
 
 The state is represented internally as a matrix of the form:
 
 <img src="readMeFigures/Matrix.png"></img>
-Aaronson/Gottesman arXiv:quant-ph/0406196
+
+[Aaronson/Gottesman arXiv:quant-ph/0406196](https://arxiv.org/abs/quant-ph/0406196)
 
 Currently I am just using Int32 Arrays, although binary arrays would save space (if it ever becomes necessary).
 Rows 1 to n of the tableau represent the destabiliser generators, rows n+1 to 2n represent the stabiliser generators. Each row is read
 as follows: if the x<sub>ij</sub> and z<sub>ij</sub> are 1, the de/stabiliser is a Y, if they are both 0, its I otherwise its an X or Z depending on which one is set.
 
-    output(state)
+```julia
+output(state)
+```
 
 Prints the state in a human readable form. The states above the line are the 'destabiliser' state, below the line are the 'stabiliser' states. 
 
@@ -91,14 +96,16 @@ cnot(t::Tableau,control,target) # apply a controlled not from control qubit to t
 
 Output of the resultant state can be supressed by adding an extra false parameter
 
-    hadamard(t::Tableau,qubit,true) # hadamard as before, but show output
+```julia
+hadamard(t::Tableau,qubit,true) # hadamard as before, but show output
+```
 
 **NOTE! that these commands alter the state passed into them. I have broken Julia convention which requires functions 
 with side effects to be written thus - hadamard!(state,qubit), rather hadamard!(qubit) alters a globally defined variable, called state.**
 
 ## Arbitrary cliffords
 
-(Koenig/Smolin arXiv:quant-ph/1406.2170)
+[Koenig/Smolin arXiv:quant-ph/1406.2170](https://arxiv.org/abs/1406.2170)
 
 The idea behind this paper is that we can implement a one-to-one mapping between the cliffords and an integer (plus a random phase string).
 
@@ -118,19 +125,21 @@ More usefully these can be placed into a stabiliser tableau (that is the equivle
 
 e.g.
 
-    t = cliffordToTableau(4,23,1)
+```julia
+t = cliffordToTableau(4,23,1)
+```
 
 Where the qubits are 4 the Clifford chosen is 23, and we have chosen the first of $4^n$ phase patterns (here n = 4).
 
-# Decomposing a tableau (such as clifford)
+# Decomposing a tableau 
 
-This will be made more general, but just now it decomposes an arbitrary tableau
+This will be made more general, but just now it decomposes an arbitrary tableau. This is not particulary efficient.
 
-    decompose(tableau)
-    
-    There is an optional parameter rationalise that defaults to true. Rationalise simply eliminates 4 phases in a row, two hadamards in a row or self cancelling cnots.
+```julia
+decompose(tableau)
+```
 
-This prints out the elementary gates that would reconstruct the relevant clifford unitary.
+This prints out the elementary gates that would reconstruct the relevant clifford unitary. There is an optional parameter rationalise that defaults to true. Rationalise simply eliminates 4 phases in a row, two hadamards in a row or self cancelling cnots.
 
 The commands are stored as string in the vector commands
 
