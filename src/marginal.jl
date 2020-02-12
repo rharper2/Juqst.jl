@@ -578,7 +578,6 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)
     pxNz = [map(x-> x == 0 ? 1e-8 : x,pxidx) for pxidx in px]
     ϕ = [vec(pxx[i]./pxNz[i]) for i in 1:(length(constraints)-1)]
-    # Marginalise over measurements to get probabilities
     push!(ϕ, vec(pxx[end]));
     return ϕ
 end
