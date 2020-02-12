@@ -13,83 +13,85 @@ export correlationMatrix
 
 ⊗ = kron
 
-""" 
+"""
 readInCSVFile(filename)
 
-## Arguments 
-	Filename: full name of a csv delimited Filename
+## Arguments
+    Filename: full name of a csv delimited Filename
 
 ## File Format
-	Assumes that each sequence appears on a new line and each line has the same number of entries.
-	Assumes that it is a raw count for each of the possible measurement outcomes.
-	Note it is important to know the order of the outcomes (this is significant).
-	Although this can be overriden, it is a assumed that they are stored as:
+    Assumes that each sequence appears on a new line and each line has the same number of entries.
+    Assumes that it is a raw count for each of the possible measurement outcomes.
+    Note it is important to know the order of the outcomes (this is significant).
+    Although this can be overriden, it is a assumed that they are stored as:
 
 ```
-			00000000
-			00000001
-			00000010
-			00000011
-			
-			...
-			11111110
-			11111111
+    00000000
+    00000001
+    00000010
+    00000011
 
-		i.e. lsb to the right.
+    ...
+    11111110
+    11111111
+
+    i.e. lsb to the right.
 ```
 Returns a full rows x col matrix depending on the number of entries of the file.
 for a 16 qubit machine, where the data was taken over 6 sequences we will return a 6x655536 array of Ints.
 
 """
 function readInCSVFile(filename)
-	return readdlm(filename,',',Int64)
+    return readdlm(filename,',',Int64)
 end
 
 """
-	transformToFidelity(data)
+transformToFidelity(data)
 
-##	Arguments:
-	Data, as returned by readInCSVFile - see help for that function.
-		
+## Arguments:
+    Data, as returned by readInCSVFile - see help for that function.
+
 ## Returns:
-	The Hadamard transformed fidelities for each sequence as a list of lists.
+    The Hadamard transformed fidelities for each sequence as a list of lists.
 
 """
 function transformToFidelity(data)
-	splitMatrix = [data[i,:]/sum(data[i,:]) for i in 1:size(data,1)]
-	return [ifwht_natural(x) for x in splitMatrix]
+    splitMatrix = [data[i,:]/sum(data[i,:]) for i in 1:size(data,1)]
+    return [ifwht_natural(x) for x in splitMatrix]
 end
 
 
 modelF(x, p) = p[1]*(p[2].^x)
 
 """
-	fitTheFidelties(lengths, data; no =0)
+fitTheFidelties(lengths, data; no =0)
 
 ## Arguments
--	`lengths: Array{Int64,1}`, e.g. collect(1:2:24) - the length at which each of the above sets of data was gathered.
 
--   `data: Array{Array{Float64,1},1}`, this is a list of observed probabilities at different sequences.
+   `lengths: Array{Int64,1}`, e.g. collect(1:2:24) - the length at which each of the above sets of data was gathered.
 
--   `no:` printed with the warning message if we fail to fit. Allowing identification of problem in "batch" fits.
+   `data: Array{Array{Float64,1},1}`, this is a list of observed probabilities at different sequences.
+
+   `no:` printed with the warning message if we fail to fit. Allowing identification of problem in "batch" fits.
 
 Take the data, transform it  and see if we can fit it to an exponential decay.
 This proves problematic where the data is a bit sparse, as the decays can be all over the place.
 In general it is *extremely* helpful to have a 0 gate sequence as that helps to anchor the fits.
-	
+
 Here we check for convergence, and warn if it doesn't converge.
 
 This enforces a cut-off to the data used for the fit. Specifically it gets rid of the 'tail' of data.
 
 ## Returns
-	three things:
-	-  the fitting parameters, 
-	-  the length of the sequence that was used for each parameter.
-	-  the indices of those that still failed to converge.
+
+three things:
+-   the fitting parameters,
+-   the length of the sequence that was used for each parameter.
+-   the indices of those that still failed to converge.
 
 ## Typical usage
 ```
-	params,_ = fithTheFidelities(transformToFidelity(data),collect(1:2:22))
+    params,_ = fithTheFidelities(collect(1:2:22),transformToFidelity(data))
 ```
 """
 function fitTheFidelities(lengths,matrix;no=0)
@@ -114,28 +116,40 @@ function fitTheFidelities(lengths,matrix;no=0)
         fit =[]
         try
             fit = curve_fit(modelF,lengths[1:lastData],extract[1:lastData],[0.8,0.8],upper=[1.0,1.0],lower=[0.01,0.01])
-        catch 
+        catch
             print("Fall back on $no, $idx\n")
             fit = curve_fit(modelF,lengths[1:lastData],extract[1:lastData],[0.8,0.4],upper=[1.0,1.0],lower=[0.01,0.01])
-            
+
         end
         if !fit.converged
             push!(failedToC,idx)
         end
         push!(params,fit.param)
         push!(dataCounted,lastData)
-    
+
     end
     if (_negCount > 0) print("$no: There were $(_negCount) with a negative first number.\n") end
     if (length(failedToC) > 0) print("$no: $(length(failedToC)) failed to converge.\n") end
     return params,dataCounted,failedToC
-end        
-   
+end
+
 
 
 
 """
-	Projects the P's onto the simplex where they are all >= 0
+projectSimplex(probs)
+
+## Arguments
+
+   probs: a probabiliity distribution, that isn't quite
+
+Takes the proffered probability distribution and projects it onto the closest probability distribution (where they are all >=0). Uses an algorithm similar to
+[Projection onto the probability simplex:
+An efficient algorithm with a simple proof, and an application)[https://arxiv.org/abs/1309.1541]
+
+
+## Returns:
+   the projected probability distrubtion.
 """
 function projectSimplex(ps)
     sortedSeq = reverse(sort(ps))
@@ -154,22 +168,28 @@ end
 
 
 """
-	Convert and project the fitted fidelities, to rerieve the 'p's representing the joint probabilities.
+ConvertAndProject(params)
 
-	Input: The parameters that have been fit.
-	Output: The projected ps.
+## Arguments
+    params: parameters that come from the fittingTheFidelities method (list of A and p)
+
+    Convert and project the fitted fidelities, to rerieve the 'p's representing the joint probabilities.
+## Returns:
+   the projected probability distribuion.
 """
 function convertAndProject(params)
-	ps = fwht_natural(map(x->x[2],params))
-	pps = projectSimplex(ps)
-	if !(isapprox(sum(pps),1))
-		@warn "There may be a problem, the probabilities do not add to 1."
-	end
-	return pps
+    ps = fwht_natural(map(x->x[2],params))
+    pps = projectSimplex(ps)
+    if !(isapprox(sum(pps),1))
+    @warn "There may be a problem, the probabilities do not add to 1."
+    end
+    return pps
 end
 
-
-function getIndices(qs;dimension=16)
+"""
+    Returns the tensor indices.
+"""
+function (qs;dimension=16)
     sqs = sort(qs)
     indices = [2^(sqs[1]-1),2]
     for i in 2:length(sqs)
@@ -181,19 +201,32 @@ function getIndices(qs;dimension=16)
 end
 
 
-""" 
-    Returns the marginalised probability, given the (projected) probabilities in pps.
+"""
+marginalise(q,pps)
+
+## Arguments
+   q the qubits you want to marginalise to, expressed as a list e.g. [1,2] marginalise away everything else
+   pps the probability distribution you want.
+
+   Example
+   ```
+      marginalise([1,3,5],pps)
+   ```
+   returns the joint probability distribution of 1,3 and 5 with all other qubits marginalised out.
+
+## Returns
+    the marginalised joint probability distribution. You may need to vec this.
 """
 function marginalise(q,pps)
     # Get indices sorts the entries
     dimension = 0
     try
-    	dimension = Integer(log(2,length(pps)))
+        dimension = Integer(log(2,length(pps)))
     catch
-    	@warn "Error, the size of pps needs to be an integer power of 2"
-    	return 
+        @warn "Error, the size of pps needs to be an integer power of 2"
+        return
     end
-    if 0 in q 
+    if 0 in q
         print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
         return nothing
     end
@@ -202,7 +235,7 @@ function marginalise(q,pps)
     sorted = sort(q)
     # This is the reverse of sortperm is from sorted -> original
     permute = [findfirst(isequal(x),sorted) for x in q]
-  
+
     # print(permute)
     # Sum over all the odd ones.
     marginalised = sum(x,dims=1:2:length(size(x)))
@@ -218,27 +251,29 @@ function marginalise(q,pps)
     end
     cols = round.(Int,2^indices/rows)
     return reshape(permutedims(reshape(marginalised,fullIndices),permute),rows,cols)
-end 
+end
 
 
 """
 gibbsRandomField(pps,constraints)
 
 ## Arguments
--	`pps: Array{Float64,1}` For example the output of convertAndProject
--	`constraints: Array{Int64,1}`: The division of the gibbs field. See below for example.
+-   `pps: Array{Float64,1}` For example the output of convertAndProject
+-   `constraints: Array{Int64,1}`: The division of the gibbs field. See below for example.
 
-	Takes a joint probability and the gibbs variable constraints and returns a vector of reduced probability distributions.
-	For example the constraints might be [[1,2,3,4],[3,4,5,6],[5,6,7,8]] over a field of 8 qubits
-	This would return an array of 3 ϕ's each 16 long (2^4), from which the joint probability can be extracted on the assumption
-	That, say, qubits 1,2 are independent of qubits 5-8.
+    Takes a joint probability and the gibbs variable constraints and returns a vector of reduced probability distributions.
+    For example the constraints might be [[1,2,3,4],[3,4,5,6],[5,6,7,8]] over a field of 8 qubits
+    This would return an array of 3 ϕ's each 16 long (2^4), from which the joint probability can be extracted on the assumption
+    That, say, qubits 1,2 are independent of qubits 5-8.
     Note: the assumption inbuilt here is that the constraints end and start with qubits in common e.g. [1,2,->3,4],[3,4<-,5,6]
-   
+
 
 Note the other version of is one gibbsRandomField, where the constraints are constraints::Array{Array{Array{Any,1},1},1}
 is probably (now) preferred - there you can specify the constraints more generally.
 In particular as tuples of qubits and the qubits they are conditioned on.
 
+## Returns
+   ϕ as a series of factors, depending on the constraints.
 """
 function gibbsRandomField(pps,constraints)
     overlaps = []
@@ -283,35 +318,39 @@ gibbsRandomField(pps,gen_constraints)
     For example the constraints might be [[(1,2),(3,4)],[(3,),(4,5,6)],[(4,5,6,7,8),()]] over a field of 8 qubits
     This would return an array of 3 ϕ's the first 16 long (2^4), the second 2^4 long and the third 2^5 long from which the joint probability can be extracted on the assumption
     That, say, qubits 1,2 are independent of qubits 5-8.
+
+## Returns
+   ϕ as a series of factors, depending on the constraints.
+
 """
 function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
  # This is more flexible than the previous one, which took overlapping contraints, to try and work out
  # what the qubits were conditioned on, e.g. if give [[1,2,3,4],[3,4,5,6]], it would assume that you wanted:
  # p(1,2|3,4)p(3,4,5,6)
- 
-    
+
+
 # Here we can expressly state the dependancies.
 # It is expecting contraints as follows a list of [ [[bits],[conditioned on]],[[bits],[conditioned on]]]
 # eg [[[1,2],[3,5]],[[3,4],[5]],[[5],[]]]
 # means that we want p(1,2|3,5)p(3,4|5)p(5)
 # Which will be returned as a 2^4, 2^2, 2^1 set of arrays.
-    
+
     overlaps = [length(i[2]) for i in constraints]
     jointMarginals = jointIfy(constraints)
-    
-    pxx = [Marginal.marginalise(x,pps) for x in jointMarginals]
+
+    pxx = [marginalise(x,pps) for x in jointMarginals]
     for i in 1:length(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
-    
-    px =  [x == [] ? 1 : vec(Marginal.marginalise([x...],pps))' for x in [i[2] for i in constraints]]
+
+    px =  [x == [] ? 1 : vec(marginalise([x...],pps))' for x in [i[2] for i in constraints]]
     # Map any zero entries in px to something non-zero or division will fail.
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)
     pxNz = [map(x-> x == 0 ? 1e-8 : x,pxidx) for pxidx in px]
     ϕ = [vec(pxx[i]./pxNz[i]) for i in 1:(length(constraints))]
 
     # If we did just allow them to be zero, then it causes problems reconstructing the probability distribution.
-    # Here we find where the reshaped vector e.g. a conditioned on b,c,d 
+    # Here we find where the reshaped vector e.g. a conditioned on b,c,d
     # is equal to zero (it should be 1, i.e.the culmlative percentage chance of a being 0 or 1 must be 1.)
     # We set the chance of it being 0 to be the average of the non 'all zero' chances. Same with 1  etc.
     # Generalised where we have a joint distribution on the left hand size (reshapeFactor)
@@ -325,7 +364,7 @@ function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
                     newVals[i] =  (mean(reshape(toC,reshapeFactor,:)[i,1:idx-1]))
                 end
                 for i in 1:reshapeFactor
-                    reshape(ϕ[cidx],reshapeFactor,:)[i,idx]=newVals[i]                
+                    reshape(ϕ[cidx],reshapeFactor,:)[i,idx]=newVals[i]
                 end
             end
         end
@@ -334,7 +373,7 @@ function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
 end
 
 
-# The function below is probably worth a bit of comment. 
+# The function below is probably worth a bit of comment.
 # uses the information in 'graining' to tells us which index the pattern we want resides in
 # For instance say we want all bits zero apart from qubit 3 (which = 1)
 # Then for ϕ[1], which represents bits [2,1,3,6] - we need the entry corresponding to decimal equiv of reverse(0,0,1,0)
@@ -344,8 +383,38 @@ end
 
 
 """
-	For a given ϕ, the list of qubits we used to construct ϕ (graining) and the 
-    Bit pattern, the probability of which we want to extract
+getGrainedP(ϕ,tomatch,graining)
+## Arguments
+    ϕ: the factor graph (possibly obtained through gibbsRandomField)
+    tomatch: the bit pattern we want
+    graining: the split for the factor graph.
+
+## Description
+   For instance say we want all bits zero apart from qubit 3 (which = 1)
+   Then for ϕ[1], which represents bits [2,1,3,6] - we need the entry corresponding to decimal equiv of reverse(0,0,1,0)
+   plus one, because 0 0 0 0 = first entry i.e. index 1.
+   We will have length(ϕ) of these entries, this gives us the perVecIndex.
+   Then we just read it out for ϕ, with a map, using foldl to multiply them for us.
+
+## Example use
+```
+   generalisedConstraints =[
+                        [[1,],[2,14]],
+                        [[2,14],[13,3]],
+                        [[13,3],[4,12]],
+                        [[4,12],[5,11]],
+                        [[5,11],[6,10]],
+                        [[6,10],[7,9]],
+                        [[7,9,8],[]]]
+    ϕ=Marginal.gibbsRandomField(singlePps,generalisedConstraints)
+    reconstructed = [Marginal.getGrainedP(ϕ,tomatch,[vcat(x[1],x[2]) for x in generalisedConstraints]) for tomatch =0:(2^14-1)]
+
+```
+    Takes a global probability distribution, uses it to fill in the factor graph variables spedified in generalisedConstraints
+    and the reconstructs the probability distribution as given by the factor graph.
+
+## Returns:
+     for the given tomatch bitpattern the extracted probability.
 """
 function getGrainedP(ϕ,tomatch,graining)
     vectorIndex = [[x&tomatch>0 ? 1 : 0 for x in (map(x->2^(x-1),i))] for i in graining]
@@ -354,9 +423,17 @@ function getGrainedP(ϕ,tomatch,graining)
 end
 
 """
-    function mutualInformation(p1,p2,p)
+mutualInformation(p1,p2,p)
 
-    Returns the mutualInformation between probabilities at p1, p2 given probability distribution p.
+## Arguments
+   p1 a qubit position
+   p2 a qubit position
+   p a global probability distribution.
+
+## Reutrns
+   the mutualInformation between probabilities at p1, p2 given probability distribution p.
+
+## Comment
     Makes use of the marginalise function to marginalise over probabilities
 
     \$MI(p1,p2) =\\sum\\limit_{x\\in p1,y\\in p2}\\left[p(x,y)\\log{\\frac{p(x,y)}{p(x),p(y)})\\right]\$
@@ -365,25 +442,25 @@ end
     Some gotchas:
         I return -1 if p1==p2 , this allows an identification of the qubit where I loop.
         if p(x,y) is 0, p(x) or p(y) is 0 then this is defined as a 'zero' part of the sum - even though the log is undefined.
-        
+
 """
 function mutualInformation(p1,p2,p)
     # Allow this for easy looping and identificaton of controlling qubit.
     #print("p1 in $p1\n")
     #print("p2 in $p2\n")
     for x in [p1...]
-        if x in [p2...] 
+        if x in [p2...]
             return -1
         end
     end
-    p12 = Marginal.marginalise([p1...,p2...],p)
+    p12 = marginalise([p1...,p2...],p)
     #println(p12)
     p1 = sum(p12,dims=2)
     #print("p1 $p1\n")
     p2 = sum(p12,dims=1)
     #print("p2 $p2\n")
     logPart = (log2.(vec(p12)) - log2.(vec(p1⊗p2)))
-    # Note that the log of 0 will give -Inf or NAN (if p1 or p2 is zero as well). 
+    # Note that the log of 0 will give -Inf or NAN (if p1 or p2 is zero as well).
     # The log can only be zero (or NAN) if the relevant
     # p12 entry is 0, which by definition means the MI contribution is 0, but of course -Inf*0 = Nan
     # So we zap the -Inf's (and Nan's) to zero which gives us the result we want.
@@ -394,15 +471,15 @@ end
 
 
 """
-	relativeEntropy(P, Q)
+    relativeEntropy(P, Q)
 
-	Calculates the relative entropy between two joint probability distributions.
-	D(P||Q) = Sum p_j*log(p_j/q_j)
+    Calculates the relative entropy between two joint probability distributions.
+    D(P||Q) = Sum p_j*log(p_j/q_j)
 
-	Undefined if any of the q_js are zero, unless the corresponding p_j is zero.
+    Undefined if any of the q_js are zero, unless the corresponding p_j is zero.
 """
 function relativeEntropy(P,Q)
-	# First of all assert that where p̃ is zero pps is also zero
+    # First of all assert that where p̃ is zero pps is also zero
     if !(length(filter(x->x!=0,P.*Q)) == length(filter(x->x!=0,P)))
             @warn "D(P||Q) - the distribution (Q) has zero values not matched by by zero values in (P) - this is undefined."
             return NaN
@@ -410,14 +487,25 @@ function relativeEntropy(P,Q)
 
     # We only need the values of P and Q where P is non zero
     nonZero = vec(map(x->x!=0,P))
-	xp = P[nonZero]
-	xq = Q[nonZero]
-	pDq = xp./xq
-	return xp'*log2.(pDq)
+    xp = P[nonZero]
+    xq = Q[nonZero]
+    pDq = xp./xq
+    return xp'*log2.(pDq)
 end
 
 """
-    Jensen-Shannon Divergence - symmetric
+JSD(dist1,dist2)
+
+## Arguments
+    dist1, probability distribuion
+    dist2, probability distribution
+
+## Discussion
+   calcluates the Jensen-Shannon Divergence between the two distributions. This is symmetric and well defined, even if the probabilities are not in each other's support. The suqare root is a metric.
+   \$JSD(P||Q) = \\frac{1}{2}D(P||M)+\\frac{1}{2}D(Q||M)\$, where
+   \$M =\\frac{1}{2}(P+Q)\$
+
+   Returns \$JSD(P||Q)\$
 """
 function JSD(dist1,dist2)
     m = 0.5.*(dist1.+dist2)
@@ -425,9 +513,15 @@ function JSD(dist1,dist2)
 end
 
 """
+reconstructedJS
+## Arguments
+    distribution: a probability distribution
+    constraints: a set of constraints (see first form of gibbsRandomField)
+## Discusion
     Given a distribution and a set of constraints.
     Reconstruct the distribution using the constraints.
-    Then return the JSD of the reconstructed distribution and the original distribution.
+## Return
+    The JSD of the reconstructed distribution and the original distribution.
 """
 function reconstructedJS(distribution,constraints)
     return JSD(reconstruct(distribution,constraints),distribution)
@@ -454,16 +548,16 @@ end
 
 
 
-""" 
+"""
     Helper function that given an xyz correctly indexes and pulls out the
     xyz from the joint probability distribution, jpXYZ
-    and the xz and yz from jpXZ and jpYZ 
+    and the xz and yz from jpXZ and jpYZ
     then does the calculation, inside the sum for that x,y,z
 """
 function getSummand(x,y,z,jpXYZ,jpXZ,jpYZ,jpZ)
     multipland = size(jpYZ)[1]
     pxyz = jpXYZ[multipland*(y-1)+x,z]
-    if pxyz == 0 
+    if pxyz == 0
         return 0
     end
     pz = jpZ[z]
@@ -475,14 +569,18 @@ end
 
 
 
-""" 
-    Gives the conditional mutual information for the qubits 
+"""
+conditionalMutualInfo
+
+## Discussion
+    Gives the conditional mutual information for the qubits
     supplied in X,Y and Z where we want I(XY|Z)
 
-	I(XY|Z) = Sum( P(x,y,z)log2( P(Z)P(X,Y,Z)/P(X,Z)P(Y,Z) )
+    \$I(XY|Z) = \\Sum( P(x,y,z)\\log(2, P(Z)P(X,Y,Z)/P(X,Z)P(Y,Z) )\$
 
+## Returns
+    \$I(XY|Z)\$
 
-    All the heavy lifting is in getSummand.
 """
 function conditionalMutualInfo(X,Y,Z,p)
     XYZ = vcat(X,Y,Z)
@@ -501,17 +599,22 @@ end
 
 
 """
-	covarianceMatrix(p)
+    covarianceMatrix(p)
 
-## Covariance
-	We can compute the covariance matrix between the 0/1 random variables representing no error / error. 
-	If x is a column vector of bits representing an error pattern, then we can compute the matrix
-	Expect_p[(x-μ) (x-μ)^T]
-	where μ = Expect_p[x]. 
+## Arguments
+    p a probability vector
+
+## Discussion
+    Computes the covariance matrix between the 0/1 random variables representing no error / error.
+    If x is a column vector of bits representing an error pattern, then we can compute the matrix
+    Expect_p[(x-μ) (x-μ)^T]
+    where μ = Expect_p[x].
 
     If we set reverse to true, then we reverse the digits.
     The way IBM stores its digits we wouldn't normally want to reverse them, but in general
     this might not be true
+## Returns
+   the matrix Expect_p[(x-μ) (x-μ)^T]
 """
 function covarianceMatrix(p;reverseDigits = false)
 # Take a probability distribution on n qubits and compute the covariance matrix as above.
@@ -559,10 +662,10 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     pxx=[]
     # Marginalise over measurements to get probabilities
     for x in constraints
-        marginalMatrix = [Marginal.marginalise(x,ms) for ms in rawData]
+        marginalMatrix = [marginalise(x,ms) for ms in rawData]
         paramsM,_ = fitTheFidelities(lengths,marginalMatrix)
         pm =  fwht_natural(vcat([1],map(x->x[2],paramsM)))
-        push!(pxx,vec(Marginal.projectSimplex(pm))');
+        push!(pxx,vec(projectSimplex(pm))');
     end
     for i in 1:length(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
@@ -572,13 +675,12 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     for (idx,x) in enumerate(constraints[1:end-1])
         lx=convert(Int,log2(length(pxx[idx])))
         toM = [y for y in lx-overlaps[idx]+1:lx]
-        push!(px,vec(Marginal.marginalise(toM,pxx[idx]))');
+        push!(px,vec(marginalise(toM,pxx[idx]))');
     end
     # Map any zero entries in px to something non-zero or division will fail.
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)
     pxNz = [map(x-> x == 0 ? 1e-8 : x,pxidx) for pxidx in px]
     ϕ = [vec(pxx[i]./pxNz[i]) for i in 1:(length(constraints)-1)]
-    # Marginalise over measurements to get probabilities
     push!(ϕ, vec(pxx[end]));
     return ϕ
 end
@@ -588,18 +690,15 @@ end
     correlationMatrix(p)
 
 ## Correlation
-   
+
     Computes the covariance matrix \$\\Sigma\$ and then let:
     \$D = \\sqrt{diag{\\Sigma}\$
 
     Return \$D^{-1}\\Sigma D^{-1}\$
-    See also See also: [`covarianceMatrix`](@ref)   
+    See also See also: [`covarianceMatrix`](@ref)
 """
 function correlationMatrix(p)
     M = covarianceMatrix(p,reverseDigits=false)
     d = sqrt(inv(LinearAlgebra.Diagonal(M)));
     return d*M*d
 end
-
-
-
