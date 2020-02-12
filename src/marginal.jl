@@ -299,12 +299,12 @@ function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
     overlaps = [length(i[2]) for i in constraints]
     jointMarginals = jointIfy(constraints)
     
-    pxx = [Marginal.marginalise(x,pps) for x in jointMarginals]
+    pxx = [marginalise(x,pps) for x in jointMarginals]
     for i in 1:length(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
     
-    px =  [x == [] ? 1 : vec(Marginal.marginalise([x...],pps))' for x in [i[2] for i in constraints]]
+    px =  [x == [] ? 1 : vec(marginalise([x...],pps))' for x in [i[2] for i in constraints]]
     # Map any zero entries in px to something non-zero or division will fail.
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)
     pxNz = [map(x-> x == 0 ? 1e-8 : x,pxidx) for pxidx in px]
@@ -376,7 +376,7 @@ function mutualInformation(p1,p2,p)
             return -1
         end
     end
-    p12 = Marginal.marginalise([p1...,p2...],p)
+    p12 = marginalise([p1...,p2...],p)
     #println(p12)
     p1 = sum(p12,dims=2)
     #print("p1 $p1\n")
@@ -559,10 +559,10 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     pxx=[]
     # Marginalise over measurements to get probabilities
     for x in constraints
-        marginalMatrix = [Marginal.marginalise(x,ms) for ms in rawData]
+        marginalMatrix = [marginalise(x,ms) for ms in rawData]
         paramsM,_ = fitTheFidelities(lengths,marginalMatrix)
         pm =  fwht_natural(vcat([1],map(x->x[2],paramsM)))
-        push!(pxx,vec(Marginal.projectSimplex(pm))');
+        push!(pxx,vec(projectSimplex(pm))');
     end
     for i in 1:length(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
@@ -572,7 +572,7 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     for (idx,x) in enumerate(constraints[1:end-1])
         lx=convert(Int,log2(length(pxx[idx])))
         toM = [y for y in lx-overlaps[idx]+1:lx]
-        push!(px,vec(Marginal.marginalise(toM,pxx[idx]))');
+        push!(px,vec(marginalise(toM,pxx[idx]))');
     end
     # Map any zero entries in px to something non-zero or division will fail.
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)

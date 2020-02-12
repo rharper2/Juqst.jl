@@ -1,7 +1,7 @@
 name = "Juqst"
 uuid = "daa2265e-435c-11e9-3d9f-ff710a317597"
 authors = ["Robin Harper <robin.harper@sydney.edu.au>"]
-version = "0.1.1"
+version = "0.1.1a"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
