@@ -337,20 +337,11 @@ function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
 
     overlaps = [length(i[2]) for i in constraints]
     jointMarginals = jointIfy(constraints)
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 200ab22fa5c770950f627052f81fa45a609107ac
     pxx = [marginalise(x,pps) for x in jointMarginals]
     for i in 1:length(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
-<<<<<<< HEAD
 
-=======
-    
->>>>>>> 200ab22fa5c770950f627052f81fa45a609107ac
     px =  [x == [] ? 1 : vec(marginalise([x...],pps))' for x in [i[2] for i in constraints]]
     # Map any zero entries in px to something non-zero or division will fail.
     # Not an issue as if px is zero, the corresponding pxx has to be zero. (and in this case by definition the probability is zero)
