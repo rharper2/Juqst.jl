@@ -26,7 +26,7 @@ Below is a introduction to the CHP part of the package.
  This is based on the formalism given by: *Improved Simulation of Stabilizer Circuits*,
  Scott Aaronson and Daniel Gottesman, arXiv:quant-ph/0406196v5
 
- The initial tableau represents a |00...0$\rangle$ ket in the stabiliser state
+ The initial tableau represents a |00...0⟩ ket in the stabiliser state
  This stabilises with "Z" and anti-stabilises with "X"
 
  For the purposes of this port, the tableau is exactly replicated as per the paper
@@ -74,7 +74,7 @@ output(state)
 
 Prints the state in a human readable form. The states above the line are the 'destabiliser' state, below the line are the 'stabiliser' states. 
 
-So in a 3 qubit system the initial state of |000> is coded as 
+So in a 3 qubit system the initial state of |000⟩ is coded as 
 
 ```
 XII
