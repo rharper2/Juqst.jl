@@ -129,7 +129,7 @@ e.g.
 t = cliffordToTableau(4,23,1)
 ```
 
-Where the qubits are 4 the Clifford chosen is 23, and we have chosen the first of $4^n$ phase patterns (here n = 4).
+Where the qubits are 4 the Clifford chosen is 23, and we have chosen the first of 4<sup>n</sup> phase patterns (here n = 4).
 
 # Decomposing a tableau 
 
