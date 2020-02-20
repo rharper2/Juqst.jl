@@ -5,5 +5,5 @@ makedocs(sitename="Juqst Documentation",pages = [
         "chp.md",
         "open-systems.md",
         "channels.md",
-	"ProbabilityAlgs.md"
+        "probability-algs.md"
     ])
