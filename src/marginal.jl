@@ -17,13 +17,13 @@ export correlationMatrix
 readInCSVFile(filename)
 
 ## Arguments
-    Filename: full name of a csv delimited Filename
+    `Filename`: full name of a csv delimited Filename
 
 ## File Format
-    Assumes that each sequence appears on a new line and each line has the same number of entries.
-    Assumes that it is a raw count for each of the possible measurement outcomes.
-    Note it is important to know the order of the outcomes (this is significant).
-    Although this can be overriden, it is a assumed that they are stored as:
+Assumes that each sequence appears on a new line and each line has the same number of entries.
+Assumes that it is a raw count for each of the possible measurement outcomes.
+Note it is important to know the order of the outcomes (this is significant).
+Although this can be overriden, it is a assumed that they are stored as:
 
 ```
     00000000
@@ -35,8 +35,9 @@ readInCSVFile(filename)
     11111110
     11111111
 
-    i.e. lsb to the right.
 ```
+i.e. lsb to the right.
+
 Returns a full rows x col matrix depending on the number of entries of the file.
 for a 16 qubit machine, where the data was taken over 6 sequences we will return a 6x655536 array of Ints.
 
@@ -49,10 +50,10 @@ end
 transformToFidelity(data)
 
 ## Arguments:
-    Data, as returned by readInCSVFile - see help for that function.
+    `Data`, as returned by readInCSVFile - see help for that function.
 
 ## Returns:
-    The Hadamard transformed fidelities for each sequence as a list of lists.
+The Hadamard transformed fidelities for each sequence as a list of lists.
 
 """
 function transformToFidelity(data)
@@ -500,8 +501,10 @@ JSD(dist1,dist2)
     dist2, probability distribution
 
 ## Discussion
-   calcluates the Jensen-Shannon Divergence between the two distributions. This is symmetric and well defined, even if the probabilities are not in each other's support. The suqare root is a metric.
+   calcluates the Jensen-Shannon Divergence between the two distributions. This is symmetric and well defined, even if the probabilities are not in each other's support. The square root is a metric.
+   
    \$JSD(P||Q) = \\frac{1}{2}D(P||M)+\\frac{1}{2}D(Q||M)\$, where
+   
    \$M =\\frac{1}{2}(P+Q)\$
 
    Returns \$JSD(P||Q)\$
