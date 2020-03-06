@@ -190,7 +190,7 @@ end
 """
     Returns the tensor indices.
 """
-function (qs;dimension=16)
+function getIndices(qs;dimension=16)
     sqs = sort(qs)
     indices = [2^(sqs[1]-1),2]
     for i in 2:length(sqs)
