@@ -1,3 +1,5 @@
+# Copyright Robin Harper 2015-2020
+
 """
     Current assumption is that the pairs are passed in so the first qubit is on top of or
     or to the left of the second qubit

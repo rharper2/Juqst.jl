@@ -1,10 +1,29 @@
 # Note this is an altered verion of the file from
 
 #  http://marcusps.github.com
-# Specifically from  https://github.com/BBN-Q/QuantumInfo.jl/blob/master/src/open-systems.jl
-# Original authors: Blake Johnson and Marcus da Silva
+#  Specifically from  https://github.com/BBN-Q/QuantumInfo.jl/blob/master/src/open-systems.jl
+#  Original authors: Blake Johnson and Marcus da Silva
 
 # Altered by Robin Harper.
+
+# Original Copyright Notice for QuantumInfo.jl stuff
+
+#Copyright (c) 2014: Raytheon BBN Technologies.
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
+# to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+# and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# With respect to changes made and stuff added:
+
+# Copyright Robin Harper 2015-2020
+
 
 ## I needed to make a few changes and just did it locally. See below.
 ## I have also decoupled it from using the "Cliffords" package as I don't actually need that one.

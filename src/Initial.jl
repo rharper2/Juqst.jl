@@ -26,6 +26,7 @@
 # measure(t,1,2)
 # print(kets(t))
 
+# Copyright Robin Harper 2015-2020
 
 
 """

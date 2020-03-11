@@ -1,6 +1,8 @@
 # Note all the graphical stuff and IBM specific stuff has been moved into a different file
 # marginalDrawing.jl which should be included if you want to use it.
 
+# Copyright Robin Harper 2016-2020
+
 
 
 using LsqFit, Hadamard, DelimitedFiles, LinearAlgebra

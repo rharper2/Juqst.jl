@@ -3,6 +3,9 @@
 # Robert Koenig and John Smolin
 # arXivv:1406.2170v1
 
+# Copyright Robin Harper 2015-2020
+
+
 # The premise here is that in order to generate a random Clifford, we can be sure of
 # proper (Haar) randomness if either we generate all the cliffords for a certain quibit size
 # and select one randomly OR if we can have a 1-1 mapping between the integers and the Cliffords
@@ -38,6 +41,8 @@
 # The generation of the Clifford requires an element from the symplectic group
 #include("Initial.jl")
 #using Main.CHP
+
+
 
 # Scratch variable in the global spce of Symplectic to be used with eval.
 _t = Tableau(3)
