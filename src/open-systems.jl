@@ -68,8 +68,11 @@ function latexArray(m)
               else 
                 start = "$start  &"
               end
-              for j = (b-5):b
+              for j = (b-5):b-1
                   start = "$start $(m[i,j]) &"
+              end
+              for j = b:b
+                  start = "$start $(m[i,j])"
               end
               start= "$start \\\\"
             end
@@ -83,8 +86,11 @@ function latexArray(m)
               else 
                 start = "$start  &"
               end
-              for j = (b-5):b
+              for j = (b-5):b-1
                   start = "$start $(m[i,j]) &"
+              end
+              for j = b:b
+                  start = "$start $(m[i,j])"
               end
               start= "$start \\\\"
             end
@@ -100,8 +106,11 @@ function latexArray(m)
               else 
                 start = "$start  &"
               end
-              for j = (b-5):b
+              for j = (b-5):b-1
                   start = "$start $(m[i,j]) &"
+              end
+              for j = b:b
+                  start = "$start $(m[i,j])"
               end
               start= "$start \\\\"
             end
@@ -122,16 +131,22 @@ function latexArray(m)
           end
           start = "$start \\vdots \\\\"
           for i = a-5:a
-               for j = 1:b
+               for j = 1:b-1
                   start = "$start $(m[i,j]) &"
               end
+              for j = b:b
+                 start = "$start $(m[i,j]) "
+              end 
               start= "$start \\\\"
             end
             start = "$start \\end{array}\\right)"
         else 
         for i = 1:size(m,1)
-          for j = 1:size(m,2)
+          for j = 1:size(m,2)-1
             start = "$start $(m[i,j]) &"
+          end
+          for j = size(m,2):size(m,2)
+            start = "$start $(m[i,j])"
           end
           start= "$start \\\\"
         end
@@ -165,7 +180,7 @@ function choi_liou_involution( r::Matrix )
 end
 
 
-# Changed again this was 3, 4, 1 2 - changed to 2, 1, 4, 3 i.e. L(x \otimes y)->L(y \otimes x)
+# RH changed again: this was 3, 4, 1 2 - changed to 2, 1, 4, 3 i.e. L(x \otimes y)->L(y \otimes x)
 function swap_involution( r::Matrix )
   d = round(Int, sqrt(size(r,1)) )
   rl = reshape( r, (d, d, d, d) )
