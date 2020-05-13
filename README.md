@@ -133,10 +133,13 @@ Where the qubits are 4 the Clifford chosen is 23, and we have chosen the first o
 
 # Decomposing a tableau 
 
-This will be made more general, but just now it decomposes an arbitrary tableau. This is not particulary efficient.
+This will be made more general, but just now it decomposes an arbitrary tableau. This is not particulary efficient. Also it hangs if you pass in a tableau with an illformed state (All the stabilisers commute. The destabilisers anti-commute with the corresponding stabiliser, but commute with all the other stabilisers and the other destabilisers).
+
+Todo: add sanity checks!
+
 
 ```julia
-decompose(tableau)
+decomposeState(tableau)
 ```
 
 This prints out the elementary gates that would reconstruct the relevant clifford unitary. There is an optional parameter rationalise that defaults to true. Rationalise simply eliminates 4 phases in a row, two hadamards in a row or self cancelling cnots.
