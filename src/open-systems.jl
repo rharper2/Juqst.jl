@@ -54,7 +54,11 @@ using SparseArrays
 # The purpose behind the repl style dots is in case you mistakenly try and print say a 1000x1000 Matrix
 # At least on my computer this would hang Jupyter.
 function latexArray(m)
-  start = string("\\left(\\begin{array}{*{11}c}")
+  todisplay = 20
+  if size(m)[1] < 20
+    todisplay =size(m)[1]
+  end
+  start = string("\\left(\\begin{array}{*{$todisplay}c}")
   if ndims(m) == 2
       (a,b) = size(m)
       if b > 20
