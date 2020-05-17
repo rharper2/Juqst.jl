@@ -665,7 +665,7 @@ function nicePrintTableauState(t::Tableau)
 		  for col=1:n
 		     start = "$start $(decode(state[row,col],state[row,col+n])) "
          if (col != n)
-            print("& ")
+            start = "$start & "
           end
 		  end
 		  start = "$start \\\\\n"
@@ -681,7 +681,7 @@ function nicePrintTableauState(t::Tableau)
 		  for col=1:n
  	        start = "$start $(decode(state[row,col],state[row,col+n])) "
             if (col != n)
-               print("& ")
+              start = "$start & "
             end
 
 		  end
