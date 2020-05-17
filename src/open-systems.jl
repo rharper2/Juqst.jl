@@ -56,7 +56,7 @@ using SparseArrays
 function latexArray(m)
   todisplay = 20
   if size(m)[1] < 20
-    todisplay =size(m)[1]
+    todisplay =size(m)[2]
   end
   start = string("\\left(\\begin{array}{*{$todisplay}c}")
   if ndims(m) == 2
