@@ -50,9 +50,6 @@ using SparseArrays
 # This violates a large number of programming principles, esp no repetition, but it should be clear.
 # The purpose behind the repl style dots is in case you mistakenly try and print say a 1000x1000 Matrix
 # At least on my computer this would hang Jupyter.
-# This violates a large number of programming principles, esp no repetition, but it should be clear.
-# The purpose behind the repl style dots is in case you mistakenly try and print say a 1000x1000 Matrix
-# At least on my computer this would hang Jupyter.
 function latexArray(m)
   todisplay = 20
   if size(m)[1] < 20

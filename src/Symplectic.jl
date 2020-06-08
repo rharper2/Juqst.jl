@@ -1261,6 +1261,17 @@ function makeFromCommand(t::Tableau)
 	return makeFromCommand(t.commands)
 end
 
+"""
+	makeInverseFromCommand(t::Tableau)
+
+	Uses the commands stored in a Tableau and uses them to build a matrix representing the inverse of the Tableau (in the computational basis)
+	Uses the original initialise command to determine the size of the system.
+	This might be useful for instance if you have a Tableau represnting Pauli measurements and you wanted the Clifford that maps them to the computational basis.
+	Note: for many qubits this gets quite big (scales as \$2^n\$)
+"""
+function makeInverseFromCommand(t::Tableau)
+	return makeFromCommand(reverse(t.commands[2:end]))
+end
 
 
 function reverseCommands(t::Tableau)
