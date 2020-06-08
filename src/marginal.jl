@@ -6,7 +6,7 @@
 
 
 using LsqFit, Hadamard, DelimitedFiles, LinearAlgebra
-using PyPlot, Statistics
+using Statistics
 import Base.show
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField
