@@ -11,7 +11,7 @@ pkg> add https://github.com/rharper2/Juqst.jl
 
 The docs/examples directory contains, suprisingly enough, some example notebooks, which I aim to continually improve. They assume IJulia. 
 
-While you are able to view them on github, the latex rendering of printed arrays doesn't appear to work with the github viewer, so they might be a bit difficult to read on github. If you download them and look at them through Jupyter they should render fine. The one that shows how to use the Stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early if you are interested in the Stabiliser part of this package.
+While you are able to view them on github, the latex rendering of printed arrays doesn't appear to work with the github viewer, so they might be a bit difficult to read on github. If you download them and look at them through Jupyter they should render fine. The one that shows how to use the stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early if you are interested in the Stabiliser part of this package.
 
 ## Package Aims
 
