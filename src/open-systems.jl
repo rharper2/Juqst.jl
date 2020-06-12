@@ -508,7 +508,7 @@ end
   e.g. with two you get ["00","01","10","11"]
 """
 function genLabels(noQubits)
-    return [string(n,base=noQubits,pad=noQubits) for n = 0:(noQubits^2-1)];
+    return [string(n,base=2,pad=noQubits) for n = 0:(noQubits^2-1)];
 end
 
 
