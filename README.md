@@ -70,7 +70,7 @@ Set Tableau.showRaw to true to see the underlying state as a matrix.
 state = setup(number_ofQubits)
 ```
 
-prepares the stabiliser state for the correct number of qubits in the |000..000> basis state
+prepares the stabiliser state for the correct number of qubits in the |000..000⟩ basis state
 
 The state is represented internally as a matrix of the form:
 
@@ -135,7 +135,7 @@ Which returns the nxn arrays (alpha->delta) coded as follows:
 
 <img src="readMeFigures/coding.png">Koenig/Smolin arXiv:quant-ph/1406.2170</img>
 
-More usefully these can be placed into a stabiliser tableau (that is the equivlent of passing the state |0000$\rangle$ through a gate that implements the unitary in question as follows:
+More usefully these can be placed into a stabiliser tableau (that is the equivlent of passing the state |0000⟩ through a gate that implements the unitary in question as follows:
 
 e.g.
 
