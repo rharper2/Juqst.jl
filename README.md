@@ -108,7 +108,7 @@ phase(t::Tableau,qubit)     # apply a phase gate to the relevant qubit
 cnot(t::Tableau,control,target) # apply a controlled not from control qubit to target qubit
 ```
 
-Output of the resultant state can be supressed by adding an extra false parameter
+Output of the resultant state can be enabled by adding an extra true parameter
 
 ```julia
 hadamard(t::Tableau,qubit,true) # hadamard as before, but show output
