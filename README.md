@@ -1,4 +1,4 @@
-# Juqst: JUlia Quantum Simulator Toolbox [![Build Status](https://travis-ci.com/rharper2/Juqst.jl.svg?branch=master)](https://travis-ci.com/rharper2/Juqst.jl)
+# Juqst: JUlia Quantum Software Toolbox [![Build Status](https://travis-ci.com/rharper2/Juqst.jl.svg?branch=master)](https://travis-ci.com/rharper2/Juqst.jl)
 # To install
 
 It should be a matter of simply using the package manager. (Shortly I'll submit this to the Julia repo, which will simplify things further).
