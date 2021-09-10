@@ -79,7 +79,7 @@ fitTheFidelties(lengths, data; no =0)
 
 Take the data, transform it  and see if we can fit it to an exponential decay.
 This proves problematic where the data is a bit sparse, as the decays can be all over the place.
-In general it is *extremely* helpful to have a 0 gate sequence as that helps to anchor the fits.
+In general it is *extremely* helpful to have good 'low' gate sequence as that helps to anchor the fits. If we have an extremely high decay rate, the intercept parameter is difficult to find.
 
 Here we check for convergence, and warn if it doesn't converge.
 
@@ -88,13 +88,13 @@ This enforces a cut-off to the data used for the fit. Specifically it gets rid o
 ## Returns
 
 three things:
--   the fitting parameters,
+-   the fitting parameters, in the form [A,p], where A is the y-axis intercept and p is the decay probability.
 -   the length of the sequence that was used for each parameter.
 -   the indices of those that still failed to converge.
 
 ## Typical usage
 ```
-    params,_ = fithTheFidelities(collect(1:2:22),transformToFidelity(data))
+    params,_ = fitTheFidelities(collect(1:2:22),transformToFidelity(data))
 ```
 """
 function fitTheFidelities(lengths,matrix;no=0)
@@ -701,8 +701,8 @@ end
     Return \$D^{-1}\\Sigma D^{-1}\$
     See also See also: [`covarianceMatrix`](@ref)
 """
-function correlationMatrix(p)
-    M = covarianceMatrix(p,reverseDigits=false)
+function correlationMatrix(p,reverseDigits=false)
+    M = covarianceMatrix(p,reverseDigits=reverseDigits)
     d = sqrt(inv(LinearAlgebra.Diagonal(M)));
     return d*M*d
 end

@@ -4,7 +4,7 @@
 
 ```@contents
 Pages = ["chp.md", "open-systems.md","channels.md","probability-algs.md"]
-Depth = 3
+Depth = 2
 ```
 
 This is some software that brings together:

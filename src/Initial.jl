@@ -506,7 +506,7 @@ function measure(t::Tableau,qubit::Integer)
 	   # print("Random first x row is ",p,"\n\n")
      # First rowsum(state,i,p) for all i 1..2n where i!=p and xia =1
 	 # If another stabiliser/de-stabiliser has an x in this position
-	 # -> "Get rid of the X in this qubit position, but using rowsum with this stabiliser"
+	 # -> "Get rid of the X in this qubit position, by using rowsum with this stabiliser"
    	 for h=1:2n # h is what we use in rowsum, i is p in rowsum
 	     if (h!=p) && (state[h,qubit]==1)
 		      rowsum(state,h,p)
@@ -617,7 +617,6 @@ function kets(originalTableau::Tableau)
     # loop through the numbers 4:7 (being 2^(3-1) to (2^3)-1)
     # In binary, this loops as 100, 101, 110, 111, So we can see This is applying
     # Row 3 with each possible combination of Rows 1 and 2.
-    #
     # Then we need to multiply the rows together if 2^(row-1) (i.e. row 2 - equates to bit 2) is not zero when
     # logically anded with the count.
 
@@ -647,6 +646,7 @@ end
     nicePrintTableauState(t::Tableau)
 
 Used by show to print out the latex equation of the current tableau for e.g. Jupyter notebook
+    In theory, if you want the latex equation call this and post into tex!
 
 """
 function nicePrintTableauState(t::Tableau)
@@ -747,10 +747,17 @@ end
 
 
 """
-GottesmanG(x1,z1,x2,z2)
-x1z1 and x2z2 represent pauli matrices by the usual 'tableau' manner
-e.g. both are 1 = Y gate, both 0 = I, otherwise same as the one thats 1.
-this returns the exponent to which i is raised if we multiply x1z1 by x2z2
+ GottesmanG(x1,z1,x2,z2)
+
+ Input:
+    x1z1 and x2z2 represent pauli matrices by the usual 'tableau' manner
+    e.g. both are 1 = Y gate, both 0 = I, otherwise same as the one thats 1.
+
+ Returns:
+    this returns the exponent to which i is raised if we multiply x1z1 by x2z2
+
+ Note:
+    I can't remember why we need this as opposed to just using cliffordPhase.
 """
 function GottesmanG(x1,z1,x2,z2)
 
@@ -758,34 +765,42 @@ function GottesmanG(x1,z1,x2,z2)
     if z1 == 0 # x1=0 z1=0, so multiplying by I
        return 0
     else  # x1=0 z1=1, so multiplying by Z
-       return x2*(1-2*z2)
+       return x2*(1-2*z2) 
+       # This confused me when I came back to it
+       # Remember ZX=iY and ZY=-iX, so 1 and -1
     end
   else
     if z1 == 0 # x1=1, z1=0, so multiplying by X
        return z2*(2*x2-1)
+       # Again, relevantly XZ=-iY (-1), XY=iZ (1)
     else # x1=1 z1=1
-       return z2-x2
+       return z2-x2 #YZ=iX (1), YX=-iZ (-1)
     end
   end
 end
 
 """
-rowsum(state,h,i)
-'sums' two rows in the state matrix.
-Pass in integers to the rows, not the rows themselves
+function rowsum(state,h,i)
+    - 'sums' two rows in the state matrix.
+    - Pass in integers to the rows, not the rows themselves
 """
 function rowsum(state,h,i)
-  # Irritatingly enough this is another example of Aaronson's paper flitting between r's being stored as 1 or 0
-  # And his implementation where he stores them as the power to take i to. (we get another example of this biting us
-  # in the stuff related to geting the Output states.
-  # Like there, I haven't the inclination to change everything and so I'll just multiple the total buy two and
-  # hope it works.
+  # This is another example of Aaronson's paper flitting between r's being stored as 1 or 0
+  # And his implementation where he stores them as the power to take i to. (I think there is another example of 
+  # this in the stuff related to geting the Output states.)
+  # It's related to the fact that the GottesmanG function returns the power i is raised to.
+  # The worry here is a little redundant, but I will take r and multiply by 2, as this then becomes the power 
+  # i is raised to, i.e. we are in the same "units" as the return of the GottemanG function.
+  # - If you follow the code through though you will see it is redundant as I am just modding by 4 adnd then
+  # checking if its ==2, which would be the same as modding by 2 and checking if ==1
+  # @TODO unit test so I can change it back and be confident it still works!
 
   # "sums" two rows in the state matrix
   # pass in integers to the rows, not the rows themselves.
   n=div(size(state,1),2)
   total = 0;
   # Step through the qubits in the row to determine overall phase.
+  # - @TODO work out if this is different from cliffordPhase(i,k)
   for j=1:n
 	  xij=state[i,j]
       zij=state[i,n+j]
@@ -795,7 +810,7 @@ function rowsum(state,h,i)
   end
   rh= state[h,2*n+1]
   ri= state[i,2*n+1]
-  grandTotal=2*rh+2*ri+2*total
+  grandTotal=2*rh+2*ri+2*total #TODO why am I multiplying total by 2.
   if mod(grandTotal,4) == 0
 	state[h,2*n+1]=0
   elseif mod(grandTotal,4) == 2
@@ -824,7 +839,7 @@ function rowswap!(alteredState,i,k)
 end
 
 function cliffordPhase(i,k)
-  # Returns the phase (0,2,3,4) when row i is left multiplied by row k
+  # Returns the phase (0,1,2,3) when row i is left multiplied by row k
   # println("CliffordPhase $i,$k")
   e=0
   n=div(length(i),2)
@@ -930,7 +945,7 @@ function rowmult(i,k) # supply two vectors and get the multiplied vector out.
   #  println("TEMP WAS 1 OR 3")
   #end
   #println("$i and $k and $(xor.(i,k))")
-  tempState = [xor(i[c],k[c]) for c =1:length(i)] # $ is Julia's bitwise j_xor.
+  tempState = [xor(i[c],k[c]) for c =1:length(i)] 
   tempState[length(i)]=temp
   #println("Returning a temp of $temp\n")
   # println("tempstate is $tempState")
