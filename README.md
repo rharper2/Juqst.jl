@@ -1,4 +1,4 @@
-# Juqst: JUlia Quantum Simulator Toolbox
+# Juqst: JUst another Quantum Software Toolbox [![Build Status](https://travis-ci.com/rharper2/Juqst.jl.svg?branch=master)](https://travis-ci.com/rharper2/Juqst.jl)
 # To install
 
 It should be a matter of simply using the package manager.
@@ -11,7 +11,22 @@ pkg> add https://github.com/rharper2/Juqst.jl
 
 The exampleNotebooks directory contains, suprisingly enough, some sample notebooks that show how to work this. They assume IJulia. The one that shows how to use the Stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early.
 
-This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html
+
+While you are able to view them on github, the latex rendering of printed arrays doesn't appear to work with the github viewer, so they might be a bit difficult to read on github. If you download them and look at them through Jupyter they should render fine. The one that shows how to use the stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early if you are interested in the Stabiliser part of this package.
+
+## Package Aims
+
+The package consolidates a number of things I use when researching better methods of characterizing noise in quantum systems (often called QCVV for Quantum Control Verification and Validation). Just now it consists of three main branches:
+
+- **Quantum Noise** - which contains all the algorithms and mechanisms necessary to extract $2^n$ eigenvalues/probabilities from a Quantum System in a single randomized benchmarking style experiment. It basically contains all the analysis code used in **Efficient Learning of quantum Noise** [arXiv:1907.13022](https://arxiv.org/abs/1907.13022). The workbooks, and graph drawing software all appear in **docs/example/quantumNoise** and show how to reproduce all the analysis and charts in that paper (and more), using the software in this package.
+- **Channel conversions and random channel creation**. The first leans heavily on a package [open-system.jl]( https://github.com/BBN-Q/QuantumInfo.jl/blob/master/src/open-systems.jl) by Blake Johnson and Marcus da Silva - although rather than just import it, I have incorporated the software so I can tweak some minor aspects of it to fit in with the rest of my sofware. There are a number of minor convenience functions I have added, including the rendering I have added for arrays, the ability to generate 'Super-Vectors' and various labels for charts etc. The second part (in rchannels.jl) deals with ways of creating random noise channels, and utilised the insights contained in a paper by Rudnicki, Puchała, Zyczkowski [Gauge invariant information concerning quantum channels](https://arxiv.org/abs/1707.06926). This allows the creation of CPTP maps that have a nice spread of various characteristics such as fidelity and unitarity.
+- **CHP and Clifford creation**. This implements the Stabiliser formalism of Aaronson and Gottesman and the and the ability to efficiently create/select arbitrary Cliffords by Koenig and Smolin. The Stabiliser formalism is prevalent in Quantum Computing and is going to become more relevant in QCVV as we move towards implementing error detection and correction codes. We can use this work to create the circuits we need to run. For instance by setting up a Clifford in the stabiliser state, we can automatically produce the Qiskit commands to create the Clifford.
+
+I have still to incorporate the recent Bravyi and Maslov [Hadamard-free circuits expose the structure of the Clifford group](https://arxiv.org/abs/2003.09412) paper into this code. Futher minor todos are to check we have valid stabiliser state before we try and decompose (invalid stabiliser states can cause infinite loops) and to automate the finding of the destabilisers.
+
+## Documentation 
+
+This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html. As perviously Mentioned the docs/examples directory contains Jupyter notebooks that work through a lot of the functionality.
 
 Below is a introduction to the CHP part of the package.
 
@@ -54,7 +69,7 @@ Set Tableau.showRaw to true to see the underlying state as a matrix.
 
     state = setup(number_ofQubits)
 
-prepares the stabiliser state for the correct number of qubits in the |000..000> basis state
+prepares the stabiliser state for the correct number of qubits in the |000..000⟩ basis state
 
 The state is represented internally as a matrix of the form:
 
@@ -89,7 +104,7 @@ phase(t::Tableau,qubit)     # apply a phase gate to the relevant qubit
 cnot(t::Tableau,control,target) # apply a controlled not from control qubit to target qubit
 ```
 
-Output of the resultant state can be supressed by adding an extra false parameter
+Output of the resultant state can be enabled by adding an extra true parameter
 
     hadamard(t::Tableau,qubit,true) # hadamard as before, but show output
 
@@ -114,7 +129,7 @@ Which returns the nxn arrays (alpha->delta) coded as follows:
 
 <img src="readMeFigures/coding.png">Koenig/Smolin arXiv:quant-ph/1406.2170</img>
 
-More usefully these can be placed into a stabiliser tableau (that is the equivlent of passing the state |0000$\rangle$ through a gate that implements the unitary in question as follows:
+More usefully these can be placed into a stabiliser tableau (that is the equivlent of passing the state |0000⟩ through a gate that implements the unitary in question as follows:
 
 e.g.
 
