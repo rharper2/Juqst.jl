@@ -559,7 +559,7 @@ end
     then does the calculation, inside the sum for that x,y,z
 """
 function getSummand(x,y,z,jpXYZ,jpXZ,jpYZ,jpZ)
-    multipland = size(jpYZ)[1]
+    multipland = size(jpXZ)[1]
     pxyz = jpXYZ[multipland*(y-1)+x,z]
     if pxyz == 0
         return 0
@@ -575,6 +575,7 @@ end
 
 """
 conditionalMutualInfo
+    Pass in vectors of qubits for X Y and Z and the distribution to analyse.
 
 ## Discussion
     Gives the conditional mutual information for the qubits
