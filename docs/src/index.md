@@ -1,7 +1,6 @@
 # Juqst Documentation
 
 
-
 This is some software that brings together:
 - the software and data that was used to analyse and craeate the plots for [Efficient Learning of Quantum Noise](https://www.nature.com/articles/s41567-020-0992-8) and [arXiv](https://arxiv.org/abs/1907.13022) (see examples/noise) 
 - a simulation of stabiliser circuits [Aaronson/Gottesman arXiv:quant-ph/0406196](http://arxiv.org/pdf/quant-ph/0406196)
@@ -16,3 +15,4 @@ This is some software that brings together:
 Pages = ["probability-algs.md","chp.md", "open-systems.md","channels.md"]
 Depth = 2
 ```
+GitHub repo [Juqst.jl](https://github.com/rharper2/Juqst.jl)
