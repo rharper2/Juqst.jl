@@ -7629,7 +7629,11 @@ html {
   color: #007989; }
 
 .ansi span.sgr37 {
+<<<<<<< HEAD
   color: gray; }
+=======
+  color: #8f8f8f; }
+>>>>>>> 12891e7 (updated)
 
 .ansi span.sgr40 {
   background-color: #242424; }
@@ -7653,10 +7657,17 @@ html {
   background-color: #007989; }
 
 .ansi span.sgr47 {
+<<<<<<< HEAD
   background-color: gray; }
 
 .ansi span.sgr90 {
   color: #616161; }
+=======
+  background-color: #8f8f8f; }
+
+.ansi span.sgr90 {
+  color: #707070; }
+>>>>>>> 12891e7 (updated)
 
 .ansi span.sgr91 {
   color: #cb3c33; }
@@ -7680,7 +7691,11 @@ html {
   color: whitesmoke; }
 
 .ansi span.sgr100 {
+<<<<<<< HEAD
   background-color: #616161; }
+=======
+  background-color: #707070; }
+>>>>>>> 12891e7 (updated)
 
 .ansi span.sgr101 {
   background-color: #cb3c33; }
@@ -7719,6 +7734,7 @@ code.language-julia-repl > span.hljs-meta {
 /*
 This is left on purpose making default.css the single file that can be lifted
 as-is from the repository directly without the need for a build step
+<<<<<<< HEAD
 
 Typically this "required" baseline CSS is added by `makestuff.js` during build.
 */
@@ -7726,6 +7742,16 @@ pre code.hljs {
   display: block;
   overflow-x: auto; }
 
+=======
+
+Typically this "required" baseline CSS is added by `makestuff.js` during build.
+*/
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em; }
+
+>>>>>>> 12891e7 (updated)
 code.hljs {
   padding: 3px 5px; }
 
