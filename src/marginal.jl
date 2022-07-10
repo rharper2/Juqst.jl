@@ -6,7 +6,7 @@
 
 
 using LsqFit, Hadamard, DelimitedFiles, LinearAlgebra
-using Statistics
+using Statistics, PyCall
 import Base.show
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField
@@ -14,6 +14,7 @@ export getGrainedP,mutualInformation,relativeEntropy,conditionalMutualInfo,covar
 export correlationMatrix
 
 ⊗ = kron
+# I have added numpy as a temporary solution - used in marginal - it is a lot more efficient than my old implementation.
 
 """
 readInCSVFile(filename)
@@ -221,6 +222,10 @@ marginalise(q,pps)
     the marginalised joint probability distribution. You may need to vec this.
 """
 function marginalise(q,pps)
+    # I have added numpy as a temporary solution - used in marginal - it is a lot more efficient than my old implementation.
+    np = pyimport("numpy")
+
+
     # Get indices sorts the entries
     dimension = 0
     try
@@ -233,15 +238,17 @@ function marginalise(q,pps)
         print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
         return nothing
     end
-    x = reshape(pps,tuple((getIndices(q,dimension=dimension))...))
-    # Below the permutation that will get us back.
-    sorted = sort(q)
-    # This is the reverse of sortperm is from sorted -> original
-    permute = [findfirst(isequal(x),sorted) for x in q]
+    original = collect(1:dimension)
+    pythonOriginal = [x-1 for x in original]
+    pythonQ = [x-1 for x in q]
+    # Here I am calling numpy's einsum to do this.
+    # Before I used shuffled things around and used sum on multiple dimensitons, but 
+    # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
+    marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
+    # return marginalised
 
-    # print(permute)
-    # Sum over all the odd ones.
-    marginalised = sum(x,dims=1:2:length(size(x)))
+    # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
+    # @TODO return a vector after I check it won't break anything.
     # Work out how many 2 variables we have
     indices = length(q)
     # Shove them in a tuple (note splat so it works well with reshape)
@@ -253,7 +260,7 @@ function marginalise(q,pps)
         rows = 1
     end
     cols = round.(Int,2^indices/rows)
-    return reshape(permutedims(reshape(marginalised,fullIndices),permute),rows,cols)
+    return reshape(marginalised,rows,cols)
 end
 
 
@@ -535,9 +542,9 @@ end
     Given a distribution and a set of constraints.
     Return the reconstruction of a distribution parameterized by the constraints.
 """
-function reconstruct(dist,constraints)
+function reconstruct(dist,constraints,qubits=14)
     gibbs2ϕ = gibbsRandomField(dist,constraints);
-    reconstructedPps2 = [getGrainedP(gibbs2ϕ,tomatch,constraints) for tomatch=0:(2^14-1)];
+    reconstructedPps2 = [getGrainedP(gibbs2ϕ,tomatch,constraints) for tomatch=0:(2^qubits-1)];
     @assert(isapprox(sum(reconstructedPps2),1))
     return reconstructedPps2
 end
