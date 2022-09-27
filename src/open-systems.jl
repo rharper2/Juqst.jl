@@ -513,9 +513,12 @@ end
 
 
 """
-  Helper function
-  Pass in the state, the noise (superOperator) and the measurements - use allZs to generate)
-  returns the mapped function.
+    measure(s,measureNoise, allZs)
+
+
+  Helper function in open-systems.jl
+  Pass in the state, the noise (as a superOperator) and the measurements - use allZs to generate)
+  returns the mapped function (x->x'*measureNoise*s,allZs)
 """
 function measure(s,measureNoise,allZs)
     map(x->x'*measureNoise*s,allZs)

@@ -539,7 +539,7 @@ end
 """
     measure(t::Tableau,qubits::Integer...;showOutput = false)
 
-Performs a measurement on the supplied qubits. Results are reproted in a dictionary of outcomes.
+Performs a measurement on the supplied qubits. Results are reported in a dictionary of outcomes.
 
 # Examples
 ```julia-repl
@@ -568,10 +568,13 @@ function measure(t::Tableau,qubits::Integer...;showOutput = false)
     for i in qubits
         outcomes[i] = measure(t,i)
     end
-    print(outcomes)
+    if showOutput
+        print(outcomes)
+    end
     if showOutput
        print(t)
     end
+    return outcomes
 end
 
 

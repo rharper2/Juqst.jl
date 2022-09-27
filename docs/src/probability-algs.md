@@ -1,7 +1,7 @@
 # Probability Distribution Commands
 
 
-## Reading in and fitting
+## Reading in device data and fitting it
 
 ```@docs
  readInCSVFile
@@ -21,7 +21,7 @@ convertAndProject
 ```
 
 
-## Projecting and marginalising
+## Projecting probabilities and marginalising probability distributions
 
 ```@docs
 projectSimplex
@@ -32,7 +32,7 @@ projectSimplex
 marginalise
 ```
 
-## Measuring and metrics
+## Measuring correlations and various other metrics
 
 ```@docs
 covarianceMatrix
@@ -64,7 +64,7 @@ conditionalMutualInfo(X,Y,Z,p)
 
 
 
-## Gibbs Random Fields
+## Gibbs Random Fields (one dimensional)
 
 
 ```@docs
