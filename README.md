@@ -12,7 +12,7 @@ pkg> add https://github.com/rharper2/Juqst.jl
 The exampleNotebooks directory contains, suprisingly enough, some sample notebooks that show how to work this. They assume IJulia. The one that shows how to use the Stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early.
 
 
-While you are able to view them on github, the latex rendering of printed arrays doesn't appear to work with the github viewer, so they might be a bit difficult to read on github. If you download them and look at them through Jupyter they should render fine. The one that shows how to use the stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early if you are interested in the Stabiliser part of this package.
+While you are able to view the notebooks on github, the latex rendering of printed arrays doesn't appear to work with the github viewer, so they might be a bit difficult to read on github. If you download them and look at them through Jupyter they should render fine. As mentioned above the workbook "A stabiliser run through" goes though the stabiliser mechanisms and plotting functions and is probably worth looking at if you are interested in the Stabiliser part of this package.
 
 ## Package Aims
 
@@ -26,7 +26,7 @@ I have still to incorporate the recent Bravyi and Maslov [Hadamard-free circuits
 
 ## Documentation 
 
-This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html. As perviously Mentioned the docs/examples directory contains Jupyter notebooks that work through a lot of the functionality.
+This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html. As perviously mentioned the docs/examples directory contains Jupyter notebooks that work through a lot of the functionality.
 
 Below is a introduction to the CHP part of the package.
 
