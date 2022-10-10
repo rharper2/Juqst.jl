@@ -41,7 +41,7 @@ Below is a introduction to the CHP part of the package.
  This is based on the formalism given by: *Improved Simulation of Stabilizer Circuits*,
  Scott Aaronson and Daniel Gottesman, arXiv:quant-ph/0406196v5
 
- The initial tableau represents a |00...0$\rangle$ ket in the stabiliser state
+ The initial tableau represents a |00...0⟩ ket in the stabiliser state
  This stabilises with "Z" and anti-stabilises with "X"
 
  For the purposes of this port, the tableau is exactly replicated as per the paper
@@ -108,8 +108,8 @@ Output of the resultant state can be enabled by adding an extra true parameter
 
     hadamard(t::Tableau,qubit,true) # hadamard as before, but show output
 
-**NOTE! that these commands alter the state passed into them. I have broken Julia convention which requires functions 
-with side effects to be written thus - hadamard!(state,qubit), rather hadamard!(qubit) alters a globally defined variable, called state.**
+**NOTE that these commands alter the state passed into them. I have broken Julia convention which requires functions 
+with side effects to be written thus - hadamard!(state,qubit), however I think it is clear enough, it is after all the intended use of the function.**
 
 ## Arbitrary cliffords
 
