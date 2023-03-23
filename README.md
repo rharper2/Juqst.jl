@@ -8,6 +8,7 @@ This has not yet been put on the main public distribution, so you will need to p
 ```
 pkg> add https://github.com/rharper2/Juqst.jl
 ```
+Documentation: https://rharper2.github.io/Juqst.jl/docs/build/index.html
 
 The exampleNotebooks directory contains, suprisingly enough, some sample notebooks that show how to work this. They assume IJulia. The one that shows how to use the Stabiliser mechanisms and plotting functions is called "A stabiliser run through". It is probably worth running that one early.
 
@@ -26,7 +27,7 @@ I have still to incorporate the recent Bravyi and Maslov [Hadamard-free circuits
 
 ## Documentation 
 
-This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html. As perviously mentioned the docs/examples directory contains Jupyter notebooks that work through a lot of the functionality.
+This readme mainly details the CHP part of the programs included, there is documentation on the other functionality which can be found here: https://rharper2.github.io/Juqst.jl/docs/build/index.html. As previously mentioned the docs/examples directory contains Jupyter notebooks that work through a lot of the functionality.
 
 Below is a introduction to the CHP part of the package.
 
