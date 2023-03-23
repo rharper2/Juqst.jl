@@ -164,22 +164,22 @@ function drawCircuit(t::Tableau)
 	currentDir = pwd()
 	for i = 1:size(commands,1)
 		m = match(r"initialise\((.*)\)",commands[i])
-		if (m!=nothing)
+		if (m!==nothing)
 			for idx=1:t.qubits
     			#push!(qasmCommands,"qubit q$i")
                 push!(labels,"q$idx")
 			end
     	else
     		m=match(r"hadamard\((.*)\)",commands[i])
-    		if (m!=nothing)
+    		if (m!==nothing)
     			push!(qasmCommands,("H","q$(m.captures[1])"))
     		else
     			m=match(r"phase\((.*)\)",commands[i])
-    			if (m!=nothing)
+    			if (m!==nothing)
                     push!(qasmCommands,("P","q$(m.captures[1])"))
     			else
     				m=match(r"cnot\((.*),(.*)\)",commands[i])
-    				if (m!=nothing)
+    				if (m !== nothing)
     					push!(qasmCommands,("CNOT","q$(m.captures[2])","q$(m.captures[1])"))
     				end
     			end
@@ -197,22 +197,22 @@ function qiskitCircuit(t::Tableau,name = "Circuit")
 	currentDir = pwd()
 	for i = 1:size(commands,1)
 		m = match(r"initialise\((.*)\)",commands[i])
-		if (m!=nothing)
+		if (m !== nothing)
 			for idx=1:Meta.parse(m.captures[1])
     			#push!(qasmCommands,"qubit q$i")
                 push!(labels,"q$idx")
 			end
     	else
     		m=match(r"hadamard\((.*)\)",commands[i])
-    		if (m!=nothing)
+    		if (m !== nothing)
     			push!(qasmCommands,"    circs.h(qreg[$(m.captures[1])])")
     		else
     			m=match(r"phase\((.*)\)",commands[i])
-    			if (m!=nothing)
+    			if (m !== nothing)
                     push!(qasmCommands,"    circs.s(qreg[$(m.captures[1])])")
     			else
     				m=match(r"cnot\((.*),(.*)\)",commands[i])
-    				if (m!=nothing)
+    				if (m !== nothing)
     					push!(qasmCommands,"    circs.cx(qreg[$(m.captures[1])],qreg[$(m.captures[2])])")
     				end
     			end
@@ -233,22 +233,22 @@ function quantikzCircuit(t::Tableau)
 	currentDir = pwd()
 	for i = 1:size(commands,1)
 		m = match(r"initialise\((.*)\)",commands[i])
-		if (m!=nothing)
+		if (m !== nothing)
 			for idx=1:Meta.parse(m.captures[1])
     			#push!(quantikzCommands,"qubit q$i")
                 push!(labels,"q$idx")
 			end
     	else
     		m=match(r"hadamard\((.*)\)",commands[i])
-    		if (m!=nothing)
+    		if (m !== nothing)
                 push!(quantikzCommands,Quantikz.H(parse(Int,m.captures[1])))
     		else
     			m=match(r"phase\((.*)\)",commands[i])
-    			if (m!=nothing)
+    			if (m !== nothing)
                     push!(quantikzCommands,Quantikz.P(parse(Int,m.captures[1])))
     			else
     				m=match(r"cnot\((.*),(.*)\)",commands[i])
-    				if (m!=nothing)
+    				if (m !== nothing)
     					push!(quantikzCommands,Quantikz.CNOT(parse(Int,m.captures[1]),parse(Int,m.captures[2])))
     				end
     			end
@@ -670,7 +670,7 @@ end
 
 function getfirstOne(myVector)
 	#println(myVector)
-	for i=1:length(myVector)
+	for i=eachindex(myVector)
 		if myVector[i]==1
 			#println("return ",i)
 			return i
@@ -991,13 +991,13 @@ function bruteForceBreadthFirst(clifford)
 		count += 1
 		if (size(gatesToApply,1) > currentAt)
 			print("Trying: ")
-				for i=1:size(gatesToApply,1)
+				for i=axis(gatesToApply,1)
 				print(gatesToApply[i]," ")
 			end
 			println("")
 			currentAt+=1
 		end
-		for index=1:size(gatesToApply,1)
+		for index in axis(gatesToApply,1)
 			#println("Going to apply ",gates[gatesToApply[index]])
 			eval(gates[gatesToApply[index]])
 		end
@@ -1008,7 +1008,7 @@ function bruteForceBreadthFirst(clifford)
 		println("Found it after (only) $count permuations")
 		println("Gates applied")
 		reverse!(gatesToApply)
-		for i = 1:size(gatesToApply,1)
+		for i in axis(gatesToApply,1)
 			println(gates[gatesToApply[i]])
 		end
 	else
@@ -1028,11 +1028,11 @@ function checkGate(tableau::Tableau,index,currentBits,n,toDelete)
 
 	checking = commands[index]
 	m = match(r"Tableau\((.*)\)",checking)
-	if (m!=nothing)
+	if (m !== nothing)
     	return
     end
     m=match(r"hadamard\((.*)\)",checking)
-    if (m!=nothing)
+    if (m !== nothing)
     	bit = parse(Int,(m.captures[1]))
     	if size(currentBits[bit],1) > 0
     		if currentBits[bit][end][1] == 2
@@ -1049,7 +1049,7 @@ function checkGate(tableau::Tableau,index,currentBits,n,toDelete)
 		return
 	end
 	m=match(r"phase\((.*)\)",checking)
-    if (m!=nothing) # Its a phase, we need 4 of these
+    if (m !== nothing) # Its a phase, we need 4 of these
     	bit = parse(Int,(m.captures[1]))
     	if size(currentBits[bit],1) > 2
     		if currentBits[bit][end][1] == 1 && currentBits[bit][end-1][1] == 1 && currentBits[bit][end-2][1] == 1
@@ -1070,7 +1070,7 @@ function checkGate(tableau::Tableau,index,currentBits,n,toDelete)
 		return
 	end
 	m=match(r"cnot\((.*),(.*)\)",checking)
-    if (m!=nothing)
+    if (m !== nothing)
     		cbit = parse(Int,(m.captures[1]))
     		tbit = parse(Int,(m.captures[2]))
     		# so just now we are going to catch two cnots in a row
@@ -1129,15 +1129,15 @@ function generateRawCliffords(;phaseGate=[1 0;0 im],hadamardGate=1/sqrt(2)*[1 1;
         	tab = cliffordToTableau(1,i,j)
         	for t in tab.commands
            		m = match(r"initialise\((.*)\)",t)
-            	if (m!=nothing)
+            	if (m !== nothing)
                 	state=[1 0;0 1]
             	else
                 	m=match(r"phase\((.*)\)",t)
-                	if (m!=nothing)
+                	if (m !== nothing)
            	        	state=state*phaseGate
             	    else
                     	m=match(r"hadamard\((.*)\)",t)
-                    	if (m!=nothing)
+                    	if (m !== nothing)
                         	state=state*hadamardGate
                     	end
                 	end
@@ -1159,24 +1159,24 @@ function drawCircuit(commands)
 	qasmCommands=[]
     labels=[]
 	currentDir = pwd()
-	for i = 1:size(commands,1)
+	for i in axis(commands,1)
 		m = match(r"setup\((.*)\)",commands[i])
-		if (m!=nothing)
+		if (m !== nothing)
 			for idx=1:Meta.parse(m.captures[1])
     			#push!(qasmCommands,"qubit q$i")
                 push!(labels,"q$idx")
 			end
     	else
     		m=match(r"hadamard\((.*)\)",commands[i])
-    		if (m!=nothing)
+    		if (m !== nothing)
     			push!(qasmCommands,("H","q$(m.captures[1])"))
     		else
     			m=match(r"phase\((.*)\)",commands[i])
-    			if (m!=nothing)
+    			if (m !== nothing)
                     push!(qasmCommands,("P","q$(m.captures[1])"))
     			else
     				m=match(r"cnot\((.*),(.*)\)",commands[i])
-    				if (m!=nothing)
+    				if (m !== nothing)
     					push!(qasmCommands,("CNOT","q$(m.captures[2])","q$(m.captures[1])"))
     				end
     			end
@@ -1211,7 +1211,7 @@ function makeFromCommand(command)
     cnot21 = [1 0 0 0;0 0 0 1;0 0 1 0;0 1 0 0]
     for t in command
         m = match(r"initialise\((.*)\)",t)
-        if (m!=nothing)
+        if (m !== nothing)
         	bit =parse(Int,(m.captures[1]))
         	maxBits=bit
             state = id;
@@ -1221,7 +1221,7 @@ function makeFromCommand(command)
             currentState = state
         else
            m=match(r"phase\((.*)\)",t)
-           if (m!=nothing)
+           if (m !== nothing)
                 bit = parse(Int,(m.captures[1]))
                 tphase = phaseG
                 for i=1:bit-1
@@ -1233,7 +1233,7 @@ function makeFromCommand(command)
 				currentState = currentState*tphase
             else
                 m=match(r"hadamard\((.*)\)",t)
-                if (m!=nothing)
+                if (m !== nothing)
                     bit = parse(Int,(m.captures[1]))
                     thad = shadamard
                     for i=1:bit-1
@@ -1245,7 +1245,7 @@ function makeFromCommand(command)
                     currentState=currentState*thad
                 else
                     m=match(r"cnot\((.*),(.*)\)",t)
-                    if (m!=nothing)
+                    if (m !== nothing)
                         cbit = parse(Int,(m.captures[1]))
                         tbit = parse(Int,(m.captures[2]))
 
@@ -1317,7 +1317,7 @@ function reverseCommands(t::Tableau)
 	newExecute  = []
 	for i = len:-1:1
 		m=match(r"phase\((.*)\)",t.commands[i])
-		if (m!=nothing)
+		if (m !== nothing)
 			push!(newCommands,t.commands[i])
 			push!(newCommands,t.commands[i])
 			push!(newCommands,t.commands[i])

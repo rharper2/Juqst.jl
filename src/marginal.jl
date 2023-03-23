@@ -60,7 +60,7 @@ The Hadamard transformed fidelities for each sequence as a list of lists.
 
 """
 function transformToFidelity(data)
-    splitMatrix = [data[i,:]/sum(data[i,:]) for i in 1:size(data,1)]
+    splitMatrix = [data[i,:]/sum(data[i,:]) for i in axes(data,1)]
     return [ifwht_natural(x) for x in splitMatrix]
 end
 
@@ -110,7 +110,7 @@ function fitTheFidelities(lengths,matrix;no=0)
         # It doesn't make a large difference, but it does make a difference.
         p1 = (extract[1]*(1+1/16))/4
         lastData = findfirst(x->p1>x,extract)
-        if lastData == nothing
+        if lastData === nothing
             lastData = length(extract)
         end
         # two is probably sufficient, but at 3 for now.
@@ -190,19 +190,20 @@ function convertAndProject(params)
     return pps
 end
 
-"""
-    Returns the tensor indices.
-"""
-function getIndices(qs;dimension=16)
-    sqs = sort(qs)
-    indices = [2^(sqs[1]-1),2]
-    for i in 2:length(sqs)
-            push!(indices,2^(sqs[i]-sqs[i-1]-1))
-            push!(indices,2)
-    end
-    push!(indices,2^(dimension-sqs[end]))
-    return indices
-end
+# I don't think this is needed any longer.
+# """
+#     Returns the tensor indices.
+# """
+# function getIndices(qs;dimension=16)
+#     sqs = sort(qs)
+#     indices = [2^(sqs[1]-1),2]
+#     for i in 2:length(sqs)
+#             push!(indices,2^(sqs[i]-sqs[i-1]-1))
+#             push!(indices,2)
+#     end
+#     push!(indices,2^(dimension-sqs[end]))
+#     return indices
+# end
 
 
 """
@@ -222,46 +223,89 @@ marginalise(q,pps)
     the marginalised joint probability distribution. You may need to vec this.
 """
 function marginalise(q,pps)
-    # I have added numpy as a temporary solution - used in marginal - it is a lot more efficient than my old implementation.
-    np = pyimport("numpy")
+    
+     # Get indices sorts the entries
+     dimension = 0
+     try
+         dimension = Integer(log(2,length(pps)))
+     catch
+         @warn "Error, the size of pps needs to be an integer power of 2"
+         return
+     end
+     if 0 in q
+         print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
+         return nothing
+     end
+ 
+ 
+     shaped = reshape(pps,[2 for i in 1:dimension]...)
+     to_sum_out = [x for x in 1:dimension if !(x in q)]
+     marginalised = reshape(sum(shaped,dims=to_sum_out),[2 for i in 1:length(q)]...)
+ 
+     # Sum seems to be a reasonably fast solution, but to allow for permutations to be specified in the
+     # argument list, we may need to permute the returned vector. e.g. if we called marginalise([3,1],pps)
+     sorted = sort(q)
+     permuted = false
+     if q!= sorted # Don't know if checking this is longer then just always permuting it.
+         permute = [findfirst(isequal(x),sorted) for x in q]
+         permuted = true
+     end
+ 
+     # Einsum does this automatically- and might be faster if there are a lot of indices.
+     # np = pyimport("numpy")
+     # original = collect(1:dimension)
+     # pythonOriginal = [x-1 for x in original]
+     # pythonQ = [x-1 for x in q]
+     # # Here I am calling numpy's einsum to do this.
+     # # Before I used shuffled things around and used sum on multiple dimensitons, but 
+     # # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
+     # marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
+  
+ 
+     # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
+     # @TODO return a vector after I check it won't break anything.
+     # Work out how many 2 variables we have
+     indices = length(q)
+     # Shove them in a tuple (note splat so it works well with reshape)
+     fullIndices = tuple([2 for i in 1:indices]...)
+     
+     # Might as well get it in a 2 dim array to return
+     # Rows has to be even of course.
+     rows = 2^(floor(Int,indices/2))
+     if rows == 0
+         rows = 1
+     end
+     cols = round.(Int,2^indices/rows)
+     if ! permuted
+         return reshape(marginalised,rows,cols)
+     end
+     return reshape(permutedims(reshape(marginalised,fullIndices),permute),rows,cols)
+ end
 
+#     original = collect(1:dimension)
+#     pythonOriginal = [x-1 for x in original]
+#     pythonQ = [x-1 for x in q]
+#     # Here I am calling numpy's einsum to do this.
+#     # Before I used shuffled things around and used sum on multiple dimensitons, but 
+#     # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
+#     marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
+#     # return marginalised
 
-    # Get indices sorts the entries
-    dimension = 0
-    try
-        dimension = Integer(log(2,length(pps)))
-    catch
-        @warn "Error, the size of pps needs to be an integer power of 2"
-        return
-    end
-    if 0 in q
-        print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
-        return nothing
-    end
-    original = collect(1:dimension)
-    pythonOriginal = [x-1 for x in original]
-    pythonQ = [x-1 for x in q]
-    # Here I am calling numpy's einsum to do this.
-    # Before I used shuffled things around and used sum on multiple dimensitons, but 
-    # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
-    marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
-    # return marginalised
-
-    # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
-    # @TODO return a vector after I check it won't break anything.
-    # Work out how many 2 variables we have
-    indices = length(q)
-    # Shove them in a tuple (note splat so it works well with reshape)
-    fullIndices = tuple([2 for i in 1:indices]...)
-    # Might as well get it in a 2 dim array to return
-    # Rows has to be even of course.
-    rows = 2^(floor(Int,indices/2))
-    if rows == 0
-        rows = 1
-    end
-    cols = round.(Int,2^indices/rows)
-    return reshape(marginalised,rows,cols)
-end
+#     # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
+#     # @TODO return a vector after I check it won't break anything.
+#     # Work out how many 2 variables we have
+#     indices = length(q)
+#     # Shove them in a tuple (note splat so it works well with reshape)
+#     fullIndices = tuple([2 for i in 1:indices]...)
+#     # Might as well get it in a 2 dim array to return
+#     # Rows has to be even of course.
+#     rows = 2^(floor(Int,indices/2))
+#     if rows == 0
+#         rows = 1
+#     end
+#     cols = round.(Int,2^indices/rows)
+#     return reshape(marginalised,rows,cols)
+# end
 
 
 """
@@ -289,14 +333,14 @@ function gibbsRandomField(pps,constraints)
     overlaps = []
     for (idx,i) in enumerate(constraints[1:end-1])
         x = findfirst(x->x==i[end],constraints[idx+1])
-        if x == nothing
+        if x === nothing
             print("Error in finding overlaps the constraints need to overlap at least slightly\n")
             return nothing
         end
         push!(overlaps,x)
     end
     pxx = [marginalise(x,pps) for x in constraints]
-    for i in 1:length(overlaps)
+    for i in eachindex(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
     px =  [vec(marginalise(x,pps))' for x in [i[end-(overlaps[idx]-1):end] for (idx,i) in enumerate(constraints[1:end-1])]]
@@ -348,7 +392,7 @@ function gibbsRandomField(pps,constraints::Array{Array{Array{Any,1},1},1})
     overlaps = [length(i[2]) for i in constraints]
     jointMarginals = jointIfy(constraints)
     pxx = [marginalise(x,pps) for x in jointMarginals]
-    for i in 1:length(overlaps)
+    for i in eachindex(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
 
@@ -665,7 +709,7 @@ function marginaliseFromRawData(rawData,constraints,lengths)
     overlaps = []
     for (idx,i) in enumerate(constraints[1:end-1])
         x = findfirst(x->x==i[end],constraints[idx+1])
-        if x == nothing
+        if x === nothing
             print("Error in finding overlaps the constraints need to overlap at least slightly\n")
             return nothing
         end
@@ -679,7 +723,7 @@ function marginaliseFromRawData(rawData,constraints,lengths)
         pm =  fwht_natural(vcat([1],map(x->x[2],paramsM)))
         push!(pxx,vec(projectSimplex(pm))');
     end
-    for i in 1:length(overlaps)
+    for i in eachindex(overlaps)
         pxx[i] = reshape(pxx[i],:,2^overlaps[i])
     end # reshape to correspand to the overlap.
     px=[]

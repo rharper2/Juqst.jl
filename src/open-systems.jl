@@ -142,7 +142,7 @@ function latexArray(m)
             end
             start = "$start \\end{array}\\right)"
         else 
-        for i = 1:size(m,1)
+        for i = axis(m,1)
           for j = 1:size(m,2)-1
             start = "$start $(m[i,j]) &"
           end
@@ -239,7 +239,7 @@ function choi2kraus(r::Matrix{T}) where T
   (vals,vecs) = eigen( d*r )
   #vals = eigvals( sqrt(size(r,1))*r )
   kraus_ops = Matrix{T}[]
-  for i in 1:length(vals)
+  for i in eachindex(vals)
     push!(kraus_ops, sqrt(round(vals[i],digits=15,RoundToZero))*mat(vecs[:,i]))
   end
   factor = tr(sum([k'*k for k in kraus_ops]))
