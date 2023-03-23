@@ -5,7 +5,7 @@ It should be a matter of simply using the package manager.
 
 This has not yet been put on the main public distribution, so you will need to point to the registry:
 
-```julia
+```
 pkg> add https://github.com/rharper2/Juqst.jl
 ```
 

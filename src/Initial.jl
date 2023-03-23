@@ -98,7 +98,7 @@ end
 """
 function Tableau(cs::Array{String,1})
     m = match(r"initialise\((.*)\)",cs[1])
-    if (m==nothing)
+    if (m === nothing)
         @warn("Command string needs to start with an intialise(::Integer) command")
         return nothing
     end
@@ -107,23 +107,23 @@ function Tableau(cs::Array{String,1})
     t.executeCommands = [Expr(:call,:initialise,:_t)]
     for c in cs[2:end]
         m=match(r"phase\((.*)\)",c)
-        if (m!=nothing)
+        if (m !== nothing)
            bit = parse(Int,(m.captures[1]))
            phase(t,bit)
         else
             m=match(r"hadamard\((.*)\)",c)
-            if (m!=nothing)
+            if (m !== nothing)
                bit = parse(Int,(m.captures[1]))
                hadamard(t,bit)
             else
                m=match(r"cnot\((.*),(.*)\)",c)
-               if (m!=nothing)
+               if (m !== nothing)
                   cbit = parse(Int,(m.captures[1]))
                   tbit = parse(Int,(m.captures[2]))
                   cnot(t,cbit,tbit)
                 else
                     m=match(r"measure\((.*)\)",c)
-                    if (m!=nothing)
+                    if (m !== nothing)
                         bit = parse(Int,(m.captures[1]))
                         measure(t,bit)
                     end
@@ -839,7 +839,7 @@ end
 function rowmult(i,k) # supply two vectors and get the multiplied vector out.
   n=div(length(i),2)
   temp = cliffordPhase(i,k)
-  tempState = [xor(i[c],k[c]) for c =1:length(i)] 
+  tempState = [xor(i[c],k[c]) for c =eachindex(i)] 
   tempState[length(i)]=temp
   return tempState
  end
