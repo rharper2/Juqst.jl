@@ -7629,7 +7629,7 @@ html {
   color: #007989; }
 
 .ansi span.sgr37 {
-  color: gray; }
+  color: #8f8f8f; }
 
 .ansi span.sgr40 {
   background-color: #242424; }
@@ -7653,10 +7653,10 @@ html {
   background-color: #007989; }
 
 .ansi span.sgr47 {
-  background-color: gray; }
+  background-color: #8f8f8f; }
 
 .ansi span.sgr90 {
-  color: #616161; }
+  color: #707070; }
 
 .ansi span.sgr91 {
   color: #cb3c33; }
@@ -7680,7 +7680,7 @@ html {
   color: whitesmoke; }
 
 .ansi span.sgr100 {
-  background-color: #616161; }
+  background-color: #707070; }
 
 .ansi span.sgr101 {
   background-color: #cb3c33; }
@@ -7724,7 +7724,8 @@ Typically this "required" baseline CSS is added by `makestuff.js` during build.
 */
 pre code.hljs {
   display: block;
-  overflow-x: auto; }
+  overflow-x: auto;
+  padding: 1em; }
 
 code.hljs {
   padding: 3px 5px; }
