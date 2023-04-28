@@ -641,18 +641,21 @@ function nicePrintTableauState(t::Tableau)
   n = t.qubits
   toOuptut = ""
   if !t.showRaw
-    start = string("\\begin{equation*} \\left(\\begin{array}{l|$(join(["c" for i in 1:n]))}")
-    for row = 1:n
-      if state[row, 2*n+1] == 1
-        toOutput = "-&"
-      else
-        toOutput = "+&"
-      end
-      start = "$start $toOutput"
-      for col = 1:n
-        start = "$start $(decode(state[row,col],state[row,col+n])) "
-        if (col != n)
-          start = "$start & "
+      start = string("\\begin{equation*} \\left(\\begin{array}{l|$(join(["c" for i in 1:n]))}")
+      for row=1:n
+          if state[row,2*n+1] == 1
+            toOutput = "-&"
+          else
+            toOutput = "+&"
+          end
+          start = "$start $toOutput &"
+          for col=1:n
+             start = "$start $(decode(state[row,col],state[row,col+n])) "
+         if (col != n)
+            start = "$start & "
+          end
+          end
+          start = "$start \\\\\n"
         end
       end
       start = "$start \\\\\n"
