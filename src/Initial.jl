@@ -641,7 +641,7 @@ function nicePrintTableauState(t::Tableau)
   n = t.qubits
   toOuptut = ""
   if !t.showRaw
-      start = string("\\begin{equation*} \\left(\\begin{array}{l|c*{$n}c}")
+      start = string("\\begin{equation*} \\left(\\begin{array}{l|$(join(["c" for i in 1:n]))}")
       for row=1:n
           if state[row,2*n+1] == 1
             toOutput = "-&"

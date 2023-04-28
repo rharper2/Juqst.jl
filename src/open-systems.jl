@@ -55,7 +55,7 @@ function latexArray(m)
   if size(m)[1] < 20
     todisplay =size(m)[2]
   end
-  start = string("\\left(\\begin{array}{*{$todisplay}c}")
+  start = string("\\left(\\begin{array}{$(join(["c" for i in 1: todisplay]))c}")
   if ndims(m) == 2
       (a,b) = size(m)
       if b > 20
@@ -142,7 +142,7 @@ function latexArray(m)
             end
             start = "$start \\end{array}\\right)"
         else 
-        for i = axis(m,1)
+        for i = 1:size(m,1)
           for j = 1:size(m,2)-1
             start = "$start $(m[i,j]) &"
           end
@@ -168,7 +168,7 @@ function nicePrint(m)
   return start
 end
 
-show(stream, ::MIME"text/latex", x::AbstractMatrix) = write(stream, nicePrint(x))
+Base.show(stream, ::MIME"text/latex", x::AbstractMatrix) = write(stream, nicePrint(x))
 
 #writemime(io, ::MIME"text/latex", x::Matrix) = write(io, nicePrint(x))
 
