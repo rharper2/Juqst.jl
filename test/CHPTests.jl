@@ -1,7 +1,9 @@
 
 @testset "Basic CHP operations" begin
 		
-			using Juqst
+		   using Juqst
+
+
 
            t = Tableau(4)
            start = Tableau(4)
@@ -120,7 +122,11 @@
 			reinitialise(t)
 			@test t.commands == ["initialise(4)"]
 
-							    
+			t = Tableau(2)
+			hadamard(t,2)
+			phase(t,2)
+			x = Tableau(t.commands)
+			@test t.state == x.state
 
     end;
 

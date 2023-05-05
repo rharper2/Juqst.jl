@@ -103,7 +103,7 @@ function Tableau(cs::Array{String,1})
     return nothing
   end
   bits = parse(Int, (m.captures[1]))
-  t = (Juqst.setup(bits), bits, false, ["initialise($bits)"], [], true)
+  t = Tableau(Juqst.setup(bits), bits, false, ["initialise($bits)"], [], true)
   t.executeCommands = [Expr(:call, :initialise, :_t)]
   for c in cs[2:end]
     m = match(r"phase\((.*)\)", c)
