@@ -153,7 +153,17 @@ The commands are stored as string in the vector commands
 
 # Draw the circuit
 
-This is a bit more involved, just now as it uses python packages. There should be an example in the notebooks. More details to be added.
+The easiest way todo this is to install the Quantikz package (using the package manager). It is quite a big package so I don't have it as a required package.
+
+Then it is simple a matter of generating the quantikz commands and passing them through:
+
+
+    using Quantikz 
+    # Convert the ciruit into quantikz commands
+    # For some Tableau t
+    c = quantikzCircuit(t)
+    # Then display it.
+    displaycircuit(c)
 
 
 
