@@ -463,15 +463,22 @@ end
 
 
 # Some more stuff just to make life easier.
-
-starting=[[1 0],[0 1]]
 ⊗ = kron
+
+zbasis = [[1 0],[0 1]]
+xbasis = map(x->1/sqrt(2) .* x,[[1 1],[1 -1]])
+ybasis = map(x->1/sqrt(2) .* x,[[1 -im],[1 im]])
+
+# This is an arbitrary ordering of our basis
+basis_selection= [xbasis,ybasis,zbasis]
+
+
 """ 
   pass in a qubit up/down state e.g. [0 0] for two qubits both in |0> state
   returns a vector of the qubits (in this case [1 0]⊗[1 0])
 """
 function buildvec(ar)
-    foldl(⊗,map(x->starting[x+1],ar))
+    foldl(⊗,map(x->zbasis[x+1],ar))
 end
 
 """
@@ -482,6 +489,62 @@ function buildDensity(ar)
     v = buildvec(ar)
     v'*v
 end
+
+
+"""
+  The following are more genearlised versions of the above (which are in the computational basis)
+  Here we can give an abrbitrary basis and get the vectors/density
+"""
+basisVec(bv) = foldl(⊗,map(x -> basis_selection[x[1]][x[2]+1],bv))
+function build_basis_Density(ar)
+    v = basisVec(ar)
+    return v'*v
+end
+function build_basis_Density(basis,values)
+    v = basisVec(zip(basis,values))
+    return v'*v
+end    
+
+"""
+## Arguments
+-   `basis: Array{Float64,1}` A list of the Paulis basis you want to oberve in. e.g. [1,2,1,3] would be four qubits
+     representing [X,Y,X,Z]
+-   `Λ: Array{Float64,2}`: The superoperator of the noise. Assumed appropriately sized (4^n x 4^n) , where n is the number
+    of basis provided.
+
+
+## Returns
+   The 2^n probability distribution (of up/down measurements) that would be seen if you put those Paulis through the channel
+   and tried to measure in the same basis.
+"""
+function observeBasis(basis,Λ::Array{Float64, 2}) 
+    qubits = length(basis)
+    ZeroBasisState = getSuperVec(build_basis_Density(basis,[0 for _ in 1:qubits]))./ √(2)^qubits
+    genBasisStabs(basis,noQubits) = map(x->round.(getSuperVec(build_basis_Density(basis,x)),digits=15),[_num2bin(i,noQubits) for i=0:(2^noQubits-1)]);
+    BasisStabilisers = [v ./ √(2)^qubits  for v in genBasisStabs(basis,qubits)] # √(2)^qubits as we don't normalise the supervecs by default
+    obs = [V'*Λ*ZeroBasisState for V in BasisStabilisers]
+    return obs
+end
+
+"""
+## Arguments
+-   `basis: Array{Float64,1}` A list of the Paulis basis you want to oberve in. e.g. [1,2,1,3] would be four qubits
+     representing [X,Y,X,Z]
+-   `Λ: Array{Float64,1}`: In this case we assume a Pauli channel and the noise is represented as a vector of the Pauli eigenvalues (4^n) long.
+
+## Returns
+   The 2^n probability distribution (of up/down measurements) that would be seen if you put those Paulis through the channel
+   and tried to measure in the same basis.
+"""
+function observeBasis(basis,Λ::Array{Float64, 1}) 
+    qubits = length(basis)
+    ZeroBasisState = getSuperVec(build_basis_Density(basis,[0 for _ in 1:qubits]))./ √(2)^qubits
+    genBasisStabs(basis,noQubits) = map(x->round.(getSuperVec(build_basis_Density(basis,x)),digits=15),[_num2bin(i,noQubits) for i=0:(2^noQubits-1)]);
+    BasisStabilisers = [v ./ √(2)^qubits  for v in genBasisStabs(basis,qubits)] # √(2)^qubits as we don't normalise the supervecs by default
+    obs = [V'* (Λ .* ZeroBasisState) for V in BasisStabilisers]
+    return obs
+end
+
 
 """ 
   pass in a density matrix, gives you the super vector that corresponds to it

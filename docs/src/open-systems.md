@@ -75,6 +75,11 @@ liou2choi
 
 ## Helper
 
+
+```@docs
+ observeBasis
+```
+
 ```@docs
  Juqst.genLabels
 ```
