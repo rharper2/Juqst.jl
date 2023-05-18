@@ -16,7 +16,7 @@ makedocs(sitename="Juqst Documentation",pages = [
 # for more information.
 deploydocs(
     repo = "github.com/rharper2/Juqst.jl.git",
-    #target = "build",
+    target = "gh-pages",
 )
 
 

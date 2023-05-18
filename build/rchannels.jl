@@ -1,5 +1,8 @@
 # Generate random channels -
 
+# Copyright Robin Harper 2016-2020
+
+
 using Distributions
 using Random
 using LinearAlgebra

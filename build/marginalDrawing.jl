@@ -1,3 +1,5 @@
+# Copyright Robin Harper 2015-2020
+
 """
     Current assumption is that the pairs are passed in so the first qubit is on top of or
     or to the left of the second qubit
@@ -91,10 +93,9 @@ function hinton(matrix,max_weight, ax;
         ax.add_patch(rect)
         rect = plt.Rectangle([size(matrix)[1]+xoffset+0.5,yoffset+1.3],0.1,0.1,
                 facecolor = "gray")
-    
         ax.add_patch(rect)
     
-        plt.annotate(s="", xy=(size(matrix)[1]-1+0.7,1.5), xytext=(size(matrix)[1]-1+0.7,0.5), arrowprops=Dict([(:arrowstyle,"<->")]))
+        plt.annotate("", xy=(size(matrix)[1]-1+0.7,1.5), xytext=(size(matrix)[1]-1+0.7,0.5), arrowprops=Dict([(:arrowstyle,"<->")]))
         plt.annotate( string(max_weight), 
                     xy=(size(matrix)[1]-1+0.8,0.8),
                     xytext=(size(matrix)[1]-1+0.8,0.8), 

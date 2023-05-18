@@ -77,7 +77,7 @@ liou2choi
 
 
 ```@docs
- observeBasis
+ Juqst.observeBasis
 ```
 
 ```@docs

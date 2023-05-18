@@ -1,10 +1,12 @@
 # Note all the graphical stuff and IBM specific stuff has been moved into a different file
 # marginalDrawing.jl which should be included if you want to use it.
 
+# Copyright Robin Harper 2016-2020
+
 
 
 using LsqFit, Hadamard, DelimitedFiles, LinearAlgebra
-using PyPlot, Statistics
+using Statistics, PyCall
 import Base.show
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField
@@ -12,18 +14,19 @@ export getGrainedP,mutualInformation,relativeEntropy,conditionalMutualInfo,covar
 export correlationMatrix
 
 ⊗ = kron
+# I have added numpy as a temporary solution - used in marginal - it is a lot more efficient than my old implementation.
 
 """
 readInCSVFile(filename)
 
 ## Arguments
-    Filename: full name of a csv delimited Filename
+    `Filename`: full name of a csv delimited Filename
 
 ## File Format
-    Assumes that each sequence appears on a new line and each line has the same number of entries.
-    Assumes that it is a raw count for each of the possible measurement outcomes.
-    Note it is important to know the order of the outcomes (this is significant).
-    Although this can be overriden, it is a assumed that they are stored as:
+Assumes that each sequence appears on a new line and each line has the same number of entries.
+Assumes that it is a raw count for each of the possible measurement outcomes.
+Note it is important to know the order of the outcomes (this is significant).
+Although this can be overriden, it is a assumed that they are stored as:
 
 ```
     00000000
@@ -35,8 +38,9 @@ readInCSVFile(filename)
     11111110
     11111111
 
-    i.e. lsb to the right.
 ```
+i.e. lsb to the right.
+
 Returns a full rows x col matrix depending on the number of entries of the file.
 for a 16 qubit machine, where the data was taken over 6 sequences we will return a 6x655536 array of Ints.
 
@@ -49,10 +53,10 @@ end
 transformToFidelity(data)
 
 ## Arguments:
-    Data, as returned by readInCSVFile - see help for that function.
+    `Data`, as returned by readInCSVFile - see help for that function.
 
 ## Returns:
-    The Hadamard transformed fidelities for each sequence as a list of lists.
+The Hadamard transformed fidelities for each sequence as a list of lists.
 
 """
 function transformToFidelity(data)
@@ -76,7 +80,7 @@ fitTheFidelties(lengths, data; no =0)
 
 Take the data, transform it  and see if we can fit it to an exponential decay.
 This proves problematic where the data is a bit sparse, as the decays can be all over the place.
-In general it is *extremely* helpful to have a 0 gate sequence as that helps to anchor the fits.
+In general it is *extremely* helpful to have good 'low' gate sequence as that helps to anchor the fits. If we have an extremely high decay rate, the intercept parameter is difficult to find.
 
 Here we check for convergence, and warn if it doesn't converge.
 
@@ -85,17 +89,17 @@ This enforces a cut-off to the data used for the fit. Specifically it gets rid o
 ## Returns
 
 three things:
--   the fitting parameters,
+-   the fitting parameters, in the form [A,p], where A is the y-axis intercept and p is the decay probability.
 -   the length of the sequence that was used for each parameter.
 -   the indices of those that still failed to converge.
 
 ## Typical usage
 ```
-    params,_ = fithTheFidelities(collect(1:2:22),transformToFidelity(data))
+    params,_ = fitTheFidelities(collect(1:2:22),data)
 ```
 """
-function fitTheFidelities(lengths,matrix;no=0)
-    revh = [ifwht_natural(x) for x in matrix]
+function fitTheFidelities(lengths,the_data;no=0)
+    revh = [ifwht_natural(x) for x in the_data]
     params = Array{Float64,1}[]
     dataCounted =[]
     failedToC = []
@@ -186,10 +190,11 @@ function convertAndProject(params)
     return pps
 end
 
+# I don't think this is needed any longer.
 # """
 #     Returns the tensor indices.
 # """
-# function (qs;dimension=16)
+# function getIndices(qs;dimension=16)
 #     sqs = sort(qs)
 #     indices = [2^(sqs[1]-1),2]
 #     for i in 2:length(sqs)
@@ -218,40 +223,89 @@ marginalise(q,pps)
     the marginalised joint probability distribution. You may need to vec this.
 """
 function marginalise(q,pps)
-    # Get indices sorts the entries
-    dimension = 0
-    try
-        dimension = Integer(log(2,length(pps)))
-    catch
-        @warn "Error, the size of pps needs to be an integer power of 2"
-        return
-    end
-    if 0 in q
-        print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
-        return nothing
-    end
-    x = reshape(pps,tuple((getIndices(q,dimension=dimension))...))
-    # Below the permutation that will get us back.
-    sorted = sort(q)
-    # This is the reverse of sortperm is from sorted -> original
-    permute = [findfirst(isequal(x),sorted) for x in q]
+    
+     # Get indices sorts the entries
+     dimension = 0
+     try
+         dimension = Integer(log(2,length(pps)))
+     catch
+         @warn "Error, the size of pps needs to be an integer power of 2"
+         return
+     end
+     if 0 in q
+         print("Please index off 1, a 0 in the bits to marginalise over will cause grief")
+         return nothing
+     end
+ 
+ 
+     shaped = reshape(pps,[2 for i in 1:dimension]...)
+     to_sum_out = [x for x in 1:dimension if !(x in q)]
+     marginalised = reshape(sum(shaped,dims=to_sum_out),[2 for i in 1:length(q)]...)
+ 
+     # Sum seems to be a reasonably fast solution, but to allow for permutations to be specified in the
+     # argument list, we may need to permute the returned vector. e.g. if we called marginalise([3,1],pps)
+     sorted = sort(q)
+     permuted = false
+     if q!= sorted # Don't know if checking this is longer then just always permuting it.
+         permute = [findfirst(isequal(x),sorted) for x in q]
+         permuted = true
+     end
+ 
+     # Einsum does this automatically- and might be faster if there are a lot of indices.
+     # np = pyimport("numpy")
+     # original = collect(1:dimension)
+     # pythonOriginal = [x-1 for x in original]
+     # pythonQ = [x-1 for x in q]
+     # # Here I am calling numpy's einsum to do this.
+     # # Before I used shuffled things around and used sum on multiple dimensitons, but 
+     # # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
+     # marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
+  
+ 
+     # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
+     # @TODO return a vector after I check it won't break anything.
+     # Work out how many 2 variables we have
+     indices = length(q)
+     # Shove them in a tuple (note splat so it works well with reshape)
+     fullIndices = tuple([2 for i in 1:indices]...)
+     
+     # Might as well get it in a 2 dim array to return
+     # Rows has to be even of course.
+     rows = 2^(floor(Int,indices/2))
+     if rows == 0
+         rows = 1
+     end
+     cols = round.(Int,2^indices/rows)
+     if ! permuted
+         return reshape(marginalised,rows,cols)
+     end
+     return reshape(permutedims(reshape(marginalised,fullIndices),permute),rows,cols)
+ end
 
-    # print(permute)
-    # Sum over all the odd ones.
-    marginalised = sum(x,dims=1:2:length(size(x)))
-    # Work out how many 2 variables we have
-    indices = length(q)
-    # Shove them in a tuple (note splat so it works well with reshape)
-    fullIndices = tuple([2 for i in 1:indices]...)
-    # Might as well get it in a 2 dim array to return
-    # Rows has to be even of course.
-    rows = 2^(floor(Int,indices/2))
-    if rows == 0
-        rows = 1
-    end
-    cols = round.(Int,2^indices/rows)
-    return reshape(permutedims(reshape(marginalised,fullIndices),permute),rows,cols)
-end
+#     original = collect(1:dimension)
+#     pythonOriginal = [x-1 for x in original]
+#     pythonQ = [x-1 for x in q]
+#     # Here I am calling numpy's einsum to do this.
+#     # Before I used shuffled things around and used sum on multiple dimensitons, but 
+#     # this is a *lot* slower than einsum. I'll puzzle away at that when I have tim.
+#     marginalised = vec(np.einsum(reshape(pps,[2 for _ in original]...),pythonOriginal,pythonQ))
+#     # return marginalised
+
+#     # For reasons I can't remember I didn't just return a vector, but rather reshaped it.
+#     # @TODO return a vector after I check it won't break anything.
+#     # Work out how many 2 variables we have
+#     indices = length(q)
+#     # Shove them in a tuple (note splat so it works well with reshape)
+#     fullIndices = tuple([2 for i in 1:indices]...)
+#     # Might as well get it in a 2 dim array to return
+#     # Rows has to be even of course.
+#     rows = 2^(floor(Int,indices/2))
+#     if rows == 0
+#         rows = 1
+#     end
+#     cols = round.(Int,2^indices/rows)
+#     return reshape(marginalised,rows,cols)
+# end
 
 
 """
@@ -500,8 +554,10 @@ JSD(dist1,dist2)
     dist2, probability distribution
 
 ## Discussion
-   calcluates the Jensen-Shannon Divergence between the two distributions. This is symmetric and well defined, even if the probabilities are not in each other's support. The suqare root is a metric.
+   calcluates the Jensen-Shannon Divergence between the two distributions. This is symmetric and well defined, even if the probabilities are not in each other's support. The square root is a metric.
+   
    \$JSD(P||Q) = \\frac{1}{2}D(P||M)+\\frac{1}{2}D(Q||M)\$, where
+   
    \$M =\\frac{1}{2}(P+Q)\$
 
    Returns \$JSD(P||Q)\$
@@ -530,9 +586,9 @@ end
     Given a distribution and a set of constraints.
     Return the reconstruction of a distribution parameterized by the constraints.
 """
-function reconstruct(dist,constraints)
+function reconstruct(dist,constraints,qubits=14)
     gibbs2ϕ = gibbsRandomField(dist,constraints);
-    reconstructedPps2 = [getGrainedP(gibbs2ϕ,tomatch,constraints) for tomatch=0:(2^14-1)];
+    reconstructedPps2 = [getGrainedP(gibbs2ϕ,tomatch,constraints) for tomatch=0:(2^qubits-1)];
     @assert(isapprox(sum(reconstructedPps2),1))
     return reconstructedPps2
 end
@@ -554,7 +610,7 @@ end
     then does the calculation, inside the sum for that x,y,z
 """
 function getSummand(x,y,z,jpXYZ,jpXZ,jpYZ,jpZ)
-    multipland = size(jpYZ)[1]
+    multipland = size(jpXZ)[1]
     pxyz = jpXYZ[multipland*(y-1)+x,z]
     if pxyz == 0
         return 0
@@ -570,6 +626,7 @@ end
 
 """
 conditionalMutualInfo
+    Pass in vectors of qubits for X Y and Z and the distribution to analyse.
 
 ## Discussion
     Gives the conditional mutual information for the qubits
@@ -696,8 +753,8 @@ end
     Return \$D^{-1}\\Sigma D^{-1}\$
     See also See also: [`covarianceMatrix`](@ref)
 """
-function correlationMatrix(p)
-    M = covarianceMatrix(p,reverseDigits=false)
+function correlationMatrix(p,reverseDigits=false)
+    M = covarianceMatrix(p,reverseDigits=reverseDigits)
     d = sqrt(inv(LinearAlgebra.Diagonal(M)));
     return d*M*d
 end
