@@ -506,6 +506,7 @@ function build_basis_Density(basis,values)
 end    
 
 """
+    observeBasis(basis,Λ)
 ## Arguments
 -   `basis: Array{Float64,1}` A list of the Paulis basis you want to oberve in. e.g. [1,2,1,3] would be four qubits
      representing [X,Y,X,Z]
@@ -527,6 +528,7 @@ function observeBasis(basis,Λ::Array{Float64, 2})
 end
 
 """
+    observeBasis(basis,Λ)
 ## Arguments
 -   `basis: Array{Float64,1}` A list of the Paulis basis you want to oberve in. e.g. [1,2,1,3] would be four qubits
      representing [X,Y,X,Z]
