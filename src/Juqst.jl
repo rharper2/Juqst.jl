@@ -63,9 +63,10 @@ export mat,
        nearestu,
        nicePrint,
        writemime,
-	makeSuper,
-	choi2chi,
-	quantikzCircuit
+	   makeSuper,
+	   choi2chi,
+	   quantikzCircuit,
+	   observeBasis
 
 include("rchannels.jl")
 

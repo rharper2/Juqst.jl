@@ -95,11 +95,11 @@ three things:
 
 ## Typical usage
 ```
-    params,_ = fitTheFidelities(collect(1:2:22),transformToFidelity(data))
+    params,_ = fitTheFidelities(collect(1:2:22),data)
 ```
 """
-function fitTheFidelities(lengths,matrix;no=0)
-    revh = [ifwht_natural(x) for x in matrix]
+function fitTheFidelities(lengths,the_data;no=0)
+    revh = [ifwht_natural(x) for x in the_data]
     params = Array{Float64,1}[]
     dataCounted =[]
     failedToC = []
