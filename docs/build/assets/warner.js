@@ -37,11 +37,7 @@ function maybeAddWarning () {
         document.body.removeChild(div);
     });
     const href = window.documenterBaseURL + '/../' + window.DOCUMENTER_STABLE;
-<<<<<<< HEAD
     div.innerHTML = 'This documentation is not for the latest stable release, but for either the development version or an older release.<br><a href="' + href + '">Click here to go to the documentation for the latest stable release.</a>';
-=======
-    div.innerHTML = 'This documentation is not for the latest version. <br> <a href="' + href + '">Go to the latest documentation</a>.';
->>>>>>> 12891e7 (updated)
     div.appendChild(closer);
     document.body.appendChild(div);
 };

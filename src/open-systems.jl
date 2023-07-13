@@ -340,6 +340,8 @@ end
 
 
 """ 
+  choi2chi
+
   Takes a choi matrix and returns the Chi Matrix 
   Note the basis here has changed from marcusps version,
   The rightmost paulis are varying the quickest.
@@ -364,7 +366,10 @@ function pauliliou2chi( m::Matrix{T}) where T
   choi2chi(liou2choi(pauliliou2liou(m)))
 end
 
-""" Takes a chi matrix and returns the choi Matrix 
+""" 
+  chi2choi
+
+  Takes a chi matrix and returns the choi Matrix 
   Note the basis here has changed from marcusps version,
   Note we normalise (divide by dsq). Some conventions differ.
   

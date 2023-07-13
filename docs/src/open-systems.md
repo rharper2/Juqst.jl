@@ -22,6 +22,10 @@
  choi2chi
 ```
 
+```@docs
+ chi2choi
+```
+
 
 ```@docs
  kraus2choi
