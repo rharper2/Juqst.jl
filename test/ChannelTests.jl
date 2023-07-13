@@ -53,6 +53,7 @@ c_s =   [3.88937+0.0im            0.00101911-0.0148631im   -0.0126756+0.00095053
         -0.0142784-0.141851im     -0.000550951-0.0126756im  -0.00015829-0.00101911im       0.018527+0.0im  ]
 
 @test isapprox(round.(c_s,digits=5),round.(choi2chi(liou2choi(pauliliou2liou(testChannel))),digits=5))
-
+testChannel = liou2choi(pauliliou2liou(kron(randomFidelityNoise(),randomFidelityNoise())))
+@test all(isapprox.(testChannel,chi2choi(choi2chi(testChannel))))
 
 end

@@ -65,6 +65,7 @@ export mat,
        writemime,
 	   makeSuper,
 	   choi2chi,
+	   chi2choi,
 	   quantikzCircuit,
 	   observeBasis
 

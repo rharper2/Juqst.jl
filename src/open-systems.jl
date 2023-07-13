@@ -327,7 +327,7 @@ function liou2pauliliou( m::Matrix{T} ) where T
   res = zeros(ComplexF64,size(m))
   l = round(Int,log2(dsq)/2)
   m = sparse(m)
-  Pvecs = [sparse(vec(Juqst._toPauli(Juqst._num2quat(i-1,l)))) for i=1:dsq]
+  Pvecs = [sparse(vec(_toPauli(_num2quat(i-1,l)))) for i=1:dsq]
   Pvecd = [x' for x in Pvecs]
   sqr = sqrt(dsq)
   for i=1:dsq
@@ -339,12 +339,10 @@ function liou2pauliliou( m::Matrix{T} ) where T
 end
 
 
-""" Takes a choi matrix and returns the Chi Matrix 
+""" 
+  Takes a choi matrix and returns the Chi Matrix 
   Note the basis here has changed from marcusps version,
- The rightmost paulis are varying the quickest.
-  Also note the transpose ( .' ) - this makes it ROW stacking
-  So for instance
-  (0 -im//im 0) vectorises as (0 -im im 0) (unlike column used elsewhere where its (0 im -im 0))
+  The rightmost paulis are varying the quickest.
 """
 function choi2chi( m::Matrix{T} ) where T
   if size(m,1) != size(m,2)
@@ -364,6 +362,27 @@ end
 
 function pauliliou2chi( m::Matrix{T}) where T
   choi2chi(liou2choi(pauliliou2liou(m)))
+end
+
+""" Takes a chi matrix and returns the choi Matrix 
+  Note the basis here has changed from marcusps version,
+  Note we normalise (divide by dsq). Some conventions differ.
+  
+"""
+function chi2choi( m::Matrix{T} ) where T
+  if size(m,1) != size(m,2)
+    error("Only square matrices supported")
+  elseif size(m,1) != 4^(floor(log2(size(m,1))/2))
+    error("Only matrices with dimension 4^n supported.")
+  end
+
+  dsq = size(m,1)
+  dim = round(Int(log2(dsq)/2))
+  pauliTranslate=vec(_toPauli(_num2quat(0,dim)))
+  for i = 2:dsq
+    pauliTranslate=hcat(pauliTranslate,vec(transpose(_toPauli(_num2quat(i-1,dim)))))
+  end
+  (pauliTranslate*m*pauliTranslate')./dsq
 end
 
 #"""
@@ -554,7 +573,7 @@ end
 function getSuperVec(density)
     d = size(density,1)
     l = round(Int,log2(d))
-    real(vec([(tr(Juqst._toPauli(Juqst._num2quat(i,l))*(density))) for i = 0:(d^2-1)]))
+    real(vec([(tr(_toPauli(_num2quat(i,l))*(density))) for i = 0:(d^2-1)]))
 end
 
 
