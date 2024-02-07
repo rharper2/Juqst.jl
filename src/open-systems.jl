@@ -220,7 +220,7 @@ function liou2choiX(r::Matrix)
 end
 
 """
-  takes the Chi matrix (Choi matrix in Pauli basis) and return the liouville superoperator, computaitonal basis
+  takes the Chi matrix (Choi matrix in Pauli basis) and return the liouville superoperator, computational basis
 """
 function choiX2liou(r::Matrix)
   d = round(Int, sqrt(size(r,1)) )
