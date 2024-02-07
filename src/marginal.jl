@@ -103,7 +103,7 @@ function fitTheFidelities(lengths,the_data;no=0)
     params = Array{Float64,1}[]
     dataCounted =[]
     failedToC = []
-    _negCount =0
+    
     for idx = 2:length(revh[1])
         extract = map(x->x[idx],revh)
         # The idea here is as per https://arxiv.org/abs/1901.00535 i.e. don't let the tail wag.
@@ -132,7 +132,6 @@ function fitTheFidelities(lengths,the_data;no=0)
         push!(dataCounted,lastData)
 
     end
-    if (_negCount > 0) print("$no: There were $(_negCount) with a negative first number.\n") end
     if (length(failedToC) > 0) print("$no: $(length(failedToC)) failed to converge.\n") end
     return params,dataCounted,failedToC
 end
