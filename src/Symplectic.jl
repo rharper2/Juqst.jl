@@ -223,40 +223,41 @@ function qiskitCircuit(t::Tableau,name = "Circuit")
 end
 
 
-using Quantikz # This is ONLY for the display functionality. If it causes problems remove the following functions.
 
-function quantikzCircuit(t::Tableau)
-	commands = t.commands
-    quantikzCommands=[]
+# using Quantikz # This is ONLY for the display functionality. If it causes problems remove the following functions.
 
-    labels=[]
-	currentDir = pwd()
-	for i = 1:size(commands,1)
-		m = match(r"initialise\((.*)\)",commands[i])
-		if (m !== nothing)
-			for idx=1:Meta.parse(m.captures[1])
-    			#push!(quantikzCommands,"qubit q$i")
-                push!(labels,"q$idx")
-			end
-    	else
-    		m=match(r"hadamard\((.*)\)",commands[i])
-    		if (m !== nothing)
-                push!(quantikzCommands,Quantikz.H(parse(Int,m.captures[1])))
-    		else
-    			m=match(r"phase\((.*)\)",commands[i])
-    			if (m !== nothing)
-                    push!(quantikzCommands,Quantikz.P(parse(Int,m.captures[1])))
-    			else
-    				m=match(r"cnot\((.*),(.*)\)",commands[i])
-    				if (m !== nothing)
-    					push!(quantikzCommands,Quantikz.CNOT(parse(Int,m.captures[1]),parse(Int,m.captures[2])))
-    				end
-    			end
-    		end
-    	end
-    end
-	return quantikzCommands
-end
+# function quantikzCircuit(t::Tableau)
+# 	commands = t.commands
+#     quantikzCommands=[]
+
+#     labels=[]
+# 	currentDir = pwd()
+# 	for i = 1:size(commands,1)
+# 		m = match(r"initialise\((.*)\)",commands[i])
+# 		if (m !== nothing)
+# 			for idx=1:Meta.parse(m.captures[1])
+#     			#push!(quantikzCommands,"qubit q$i")
+#                 push!(labels,"q$idx")
+# 			end
+#     	else
+#     		m=match(r"hadamard\((.*)\)",commands[i])
+#     		if (m !== nothing)
+#                 push!(quantikzCommands,Quantikz.H(parse(Int,m.captures[1])))
+#     		else
+#     			m=match(r"phase\((.*)\)",commands[i])
+#     			if (m !== nothing)
+#                     push!(quantikzCommands,Quantikz.P(parse(Int,m.captures[1])))
+#     			else
+#     				m=match(r"cnot\((.*),(.*)\)",commands[i])
+#     				if (m !== nothing)
+#     					push!(quantikzCommands,Quantikz.CNOT(parse(Int,m.captures[1]),parse(Int,m.captures[2])))
+#     				end
+#     			end
+#     		end
+#     	end
+#     end
+# 	return quantikzCommands
+# end
 
 
 ###################### Functions used to create Clifford tabelau.
