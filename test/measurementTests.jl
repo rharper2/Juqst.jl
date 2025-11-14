@@ -1,5 +1,5 @@
 using Juqst
-using Hadamard
+
 @testset "Distribution Measurement Tests" begin
 
 
@@ -80,7 +80,6 @@ p[1]+=1-sum(p)
 
 # Eigenvalues
 
-using Hadamard
 using LinearAlgebra
 
 ⊗ = kron

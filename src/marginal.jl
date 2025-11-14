@@ -5,13 +5,56 @@
 
 
 
-using LsqFit, Hadamard, DelimitedFiles, LinearAlgebra
+using LsqFit, DelimitedFiles, LinearAlgebra
 using Statistics, PyCall
 import Base.show
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField
 export getGrainedP,mutualInformation,relativeEntropy,conditionalMutualInfo,covarianceMatrix,JSD
 export correlationMatrix
+
+
+# We used to use the Hadamard package, but that broke under 1.12, so I have just implemented the 
+# functions we use, basically fwht_natural and ifwht_natural.
+
+
+function fwht!(x)
+           n = length(x)
+           k = 1
+           while k < n
+               for i in 1:2k:n
+                   for j in 0:k-1
+                       a = x[i+j]
+                       b = x[i+j+k]
+                       x[i+j]   = a + b
+                       x[i+j+k] = a - b
+                   end
+               end
+               k *= 2
+           end
+           return x
+       end
+
+
+function fwht_natural(x)
+    return fwht(copy(x))
+end
+
+function ifwht_natural(x)
+    return ifwht(copy(x))
+end
+
+function ifwht(x)
+    return fwht!(copy(x))
+end 
+
+
+function fwht(x)
+    return fwht!(copy(x))./length(x)
+end 
+
+
+
 
 ⊗ = kron
 # I have added numpy as a temporary solution - used in marginal - it is a lot more efficient than my old implementation.
@@ -99,6 +142,7 @@ three things:
 ```
 """
 function fitTheFidelities(lengths,the_data;no=0)
+    lengths = collect(lengths) # if it's already an array doesn't cause an issue
     revh = [ifwht_natural(x) for x in the_data]
     params = Array{Float64,1}[]
     dataCounted =[]

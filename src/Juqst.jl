@@ -63,11 +63,12 @@ export mat,
        nearestu,
        nicePrint,
        writemime,
-	   makeSuper,
-	   choi2chi,
-	   chi2choi,
-	   quantikzCircuit,
-	   observeBasis
+	makeSuper,
+	choi2chi,
+	chi2choi,
+	quantikzCircuit,
+	observeBasis
+
 
 include("rchannels.jl")
 
@@ -82,6 +83,10 @@ export 	fidelity,
 
 include("marginal.jl")
 
+export fwht_natural,
+	fwht,
+	ifwht_natural,
+	ifwht
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField,marginalise,projectSimplex,getIndices,reconstructedJS
 export reconstruct,covarianceMatrix
