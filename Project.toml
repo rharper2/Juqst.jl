@@ -1,6 +1,6 @@
 name = "Juqst"
 uuid = "daa2265e-435c-11e9-3d9f-ff710a317597"
-version = "0.2.0-a2"
+version = "0.2.0-a3"
 authors = ["Robin Harper <robin.harper@sydney.edu.au>"]
 
 [deps]
