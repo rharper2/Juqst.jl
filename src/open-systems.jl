@@ -1,4 +1,4 @@
-# Note this is an altered verion of the file from
+# Note this is an altered version of the file from
 
 #  http://marcusps.github.com
 #  Specifically from  https://github.com/BBN-Q/QuantumInfo.jl/blob/master/src/open-systems.jl

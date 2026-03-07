@@ -6,7 +6,7 @@
 
 
 using LsqFit, DelimitedFiles, LinearAlgebra
-using Statistics, PyCall
+using Statistics
 import Base.show
 
 export readInCSVFile,transformToFidelity,fitTheFidelities,convertAndProject,gibbsRandomField

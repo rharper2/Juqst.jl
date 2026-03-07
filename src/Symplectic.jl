@@ -33,7 +33,7 @@
 #
 # Use is made of the ability of Julia to manipulate its own commands (a sort of hybrid functional/imperative)
 # approach. With decomposition we are using arrays stored with the Tableau
-# The first "commands" is a text represenetation of the commands needed to rebuild a decomposed end state.
+# The first "commands" is a text representation of the commands needed to rebuild a decomposed end state.
 # the second "executeCommands" contains the actual Julia instructions to rebuild the state.
 # They are only populated when the appropriate decompositions have been made.
 # This is better documented in the appropriate methods.
@@ -44,7 +44,7 @@
 
 
 
-# Scratch variable in the global spce of Symplectic to be used with eval.
+# Scratch variable in the global space of Symplectic to be used with eval.
 _t = Tableau(3)
 
 
@@ -260,7 +260,7 @@ end
 # end
 
 
-###################### Functions used to create Clifford tabelau.
+###################### Functions used to create Clifford tableau.
 
 
 
